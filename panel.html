@@ -4,9 +4,6 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>LinQ Admin</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
 :root{
   --ink:#FFFFFF;
@@ -24,7 +21,7 @@
 [hidden]{display:none!important}
 body{
   background:var(--ink);color:var(--paper);
-  font:400 13px/1.55 "IBM Plex Sans",system-ui,sans-serif;
+  font:400 13px/1.55 system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
   -webkit-font-smoothing:antialiased;overflow-x:hidden;
 }
 button,input,select,textarea{font-family:inherit}
@@ -35,17 +32,17 @@ button,input,select,textarea{font-family:inherit}
   display:flex;align-items:center;justify-content:center;padding:22px;
 }
 .lock-box{width:100%;max-width:330px;text-align:center}
-.lock-t{font:800 24px "IBM Plex Sans",sans-serif;letter-spacing:-.01em}
+.lock-t{font:800 24px system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;letter-spacing:-.01em}
 .lock-t span{color:var(--spark)}
 .lock-t b{color:var(--red)}
-.lock-s{color:var(--dim);font:400 12.4px "IBM Plex Sans",sans-serif;margin:7px 0 18px}
+.lock-s{color:var(--dim);font:400 12.4px system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;margin:7px 0 18px}
 .lock input{
   width:100%;text-align:center;letter-spacing:.14em;
   background:#fff;border:1px solid var(--line);border-radius:12px;
   padding:13px 14px;font-size:15px;color:var(--paper);outline:none;
 }
 .lock input:focus{border-color:var(--spark)}
-.lock-err{color:var(--red);font:600 11.4px "IBM Plex Sans",sans-serif;margin-top:9px}
+.lock-err{color:var(--red);font:600 11.4px system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;margin-top:9px}
 .lock .btn{margin-top:14px}
 
 /* ---------- frame ---------- */
@@ -56,10 +53,10 @@ header{
   padding:12px 14px 10px;border-bottom:1px solid var(--line);
   display:flex;align-items:center;justify-content:space-between;gap:10px;
 }
-h1{font:800 17px "IBM Plex Sans",sans-serif;letter-spacing:.01em}
+h1{font:800 17px system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;letter-spacing:.01em}
 .bmark span{color:var(--spark)}
 .bmark b{color:var(--red)}
-.tagline{color:var(--dim);font:500 10.4px "IBM Plex Sans",sans-serif;letter-spacing:.08em;text-transform:uppercase}
+.tagline{color:var(--dim);font:500 10.4px system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;letter-spacing:.08em;text-transform:uppercase}
 
 main{flex:1 0 auto;padding:14px 14px 96px}
 
@@ -72,7 +69,7 @@ nav .nv{max-width:430px;margin:0 auto;width:100%;display:grid;grid-template-colu
 nav button{
   background:none;border:0;cursor:pointer;color:var(--dim);
   display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:4px;
-  font:500 9.4px/1.15 "IBM Plex Sans",sans-serif;padding:2px 0;
+  font:500 9.4px/1.15 system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;padding:2px 0;
   text-align:center;white-space:nowrap;width:100%;
 }
 nav button.on{color:var(--spark);font-weight:700}
@@ -81,7 +78,7 @@ nav .ic{position:relative;display:block}
 .dot{
   position:absolute;top:-5px;right:-11px;min-width:16px;height:16px;padding:0 4px;
   border-radius:999px;background:var(--red);color:#fff;
-  font:700 9.4px/16px "IBM Plex Sans",sans-serif;text-align:center;
+  font:700 9.4px/16px system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;text-align:center;
   box-shadow:0 0 0 2px #fff;
 }
 .seg{position:relative}
@@ -90,7 +87,7 @@ nav .ic{position:relative;display:block}
 /* ---------- dashboard ---------- */
 .sec{margin-bottom:20px}
 .sec-h{
-  color:var(--paper);font:700 12.4px "IBM Plex Sans",sans-serif;
+  color:var(--paper);font:700 12.4px system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
   letter-spacing:.03em;text-transform:uppercase;margin-bottom:9px;
   display:flex;align-items:center;gap:7px;
 }
@@ -101,19 +98,19 @@ nav .ic{position:relative;display:block}
   padding:12px 13px;box-shadow:0 8px 20px rgba(16,40,80,.07);
   margin-bottom:10px;
 }
-.card-t{color:var(--dim);font:500 10.6px "IBM Plex Sans",sans-serif;letter-spacing:.03em;margin-bottom:9px}
+.card-t{color:var(--dim);font:500 10.6px system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;letter-spacing:.03em;margin-bottom:9px}
 .quad{display:grid;grid-template-columns:repeat(4,1fr);gap:7px}
 .quad div{background:var(--panel);border-radius:9px;padding:7px 4px;text-align:center}
-.quad b{display:block;color:var(--paper);font:700 15px "IBM Plex Sans",sans-serif}
-.quad span{display:block;color:var(--dim);font:500 8.8px "IBM Plex Sans",sans-serif;letter-spacing:.04em;text-transform:uppercase;margin-top:1px}
+.quad b{display:block;color:var(--paper);font:700 15px system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif}
+.quad span{display:block;color:var(--dim);font:500 8.8px system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;letter-spacing:.04em;text-transform:uppercase;margin-top:1px}
 
 .pair{display:grid;grid-template-columns:1fr 1fr;gap:9px}
 .stat{
   background:#fff;border:1px solid var(--line);border-radius:13px;
   padding:11px 12px;box-shadow:0 7px 18px rgba(16,40,80,.06);
 }
-.stat b{display:block;color:var(--spark);font:800 21px "IBM Plex Sans",sans-serif;line-height:1.1}
-.stat span{display:block;color:var(--dim);font:500 10.4px/1.35 "IBM Plex Sans",sans-serif;margin-top:3px}
+.stat b{display:block;color:var(--spark);font:800 21px system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;line-height:1.1}
+.stat span{display:block;color:var(--dim);font:500 10.4px/1.35 system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;margin-top:3px}
 .stat.red b{color:var(--red)}
 .stat.ok b{color:var(--ok)}
 
@@ -122,7 +119,7 @@ nav .ic{position:relative;display:block}
 .seg{
   flex:1;cursor:pointer;border-radius:999px;padding:8px 4px;text-align:center;
   background:#fff;border:1px solid var(--line);color:var(--paper);
-  font:600 11.4px "IBM Plex Sans",sans-serif;
+  font:600 11.4px system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
 }
 .seg.on{background:var(--spark);border-color:var(--spark);color:#fff}
 .lead{
@@ -130,20 +127,20 @@ nav .ic{position:relative;display:block}
   border-radius:12px;padding:11px 12px;margin-bottom:9px;
   box-shadow:0 6px 16px rgba(16,40,80,.06);
 }
-.lead-n{color:var(--paper);font:700 13px "IBM Plex Sans",sans-serif}
-.lead-d{color:var(--dim);font:400 10.6px "IBM Plex Mono",monospace;float:right}
-.lead-r{display:flex;gap:6px;margin-top:5px;font:400 11.4px "IBM Plex Sans",sans-serif;color:var(--dim)}
+.lead-n{color:var(--paper);font:700 13px system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif}
+.lead-d{color:var(--dim);font:400 10.6px ui-monospace,"SF Mono",Menlo,Consolas,"Roboto Mono",monospace;float:right}
+.lead-r{display:flex;gap:6px;margin-top:5px;font:400 11.4px system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;color:var(--dim)}
 .lead-r b{color:var(--paper);font-weight:600}
 .lead-tag{
   display:inline-block;margin-top:7px;background:var(--panel-2);color:var(--spark-lit);
-  border-radius:999px;padding:3px 9px;font:600 9.8px "IBM Plex Sans",sans-serif;
+  border-radius:999px;padding:3px 9px;font:600 9.8px system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
 }
-.empty{text-align:center;color:var(--dim);padding:46px 10px;font:400 12.4px "IBM Plex Sans",sans-serif}
-.empty b{display:block;color:var(--paper);font:700 15px "IBM Plex Sans",sans-serif;margin-bottom:5px}
+.empty{text-align:center;color:var(--dim);padding:46px 10px;font:400 12.4px system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif}
+.empty b{display:block;color:var(--paper);font:700 15px system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;margin-bottom:5px}
 
 /* ---------- forms ---------- */
 .f{display:block;margin-bottom:10px}
-.f span{display:block;color:var(--dim);font:500 10.4px "IBM Plex Sans",sans-serif;letter-spacing:.03em;margin-bottom:4px}
+.f span{display:block;color:var(--dim);font:500 10.4px system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;letter-spacing:.03em;margin-bottom:4px}
 .f input,.f select,.f textarea{
   width:100%;background:#fff;border:1px solid var(--line);border-radius:10px;
   padding:9px 11px;color:var(--paper);font-size:12.6px;outline:none;
@@ -154,7 +151,7 @@ nav .ic{position:relative;display:block}
 
 .btn{
   cursor:pointer;border:0;border-radius:999px;background:var(--spark);color:#fff;
-  padding:11px 18px;font:700 12px "IBM Plex Sans",sans-serif;
+  padding:11px 18px;font:700 12px system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
   letter-spacing:.05em;text-transform:uppercase;
   box-shadow:0 10px 24px rgba(10,87,208,.32);
 }
@@ -171,14 +168,14 @@ nav .ic{position:relative;display:block}
   background:var(--panel);border:2px dashed var(--spark);overflow:hidden;
 }
 .pic img{width:100%;height:100%;object-fit:contain;background:#fff}
-.pic span{position:absolute;color:var(--spark);font:600 10px "IBM Plex Sans",sans-serif}
+.pic span{position:absolute;color:var(--spark);font:600 10px system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif}
 
 .pt{
   background:var(--panel);border:1px solid var(--line);border-radius:12px;
   padding:10px;margin-bottom:9px;
 }
 .pt-h{display:flex;align-items:center;justify-content:space-between;margin-bottom:7px}
-.pt-n{color:var(--spark);font:700 10.4px "IBM Plex Mono",monospace}
+.pt-n{color:var(--spark);font:700 10.4px ui-monospace,"SF Mono",Menlo,Consolas,"Roboto Mono",monospace}
 .pt input{background:#fff}
 .pt .f{margin-bottom:7px}
 
@@ -187,11 +184,11 @@ nav .ic{position:relative;display:block}
 .qtab{
   flex:1;cursor:pointer;border-radius:9px;padding:7px 2px;text-align:center;
   background:#fff;border:1px solid var(--line);color:var(--paper);
-  font:600 10.6px "IBM Plex Sans",sans-serif;
+  font:600 10.6px system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
 }
 .qtab.on{background:var(--spark);border-color:var(--spark);color:#fff}
-.qtab i{display:block;font-style:normal;font:500 8.6px "IBM Plex Sans",sans-serif;opacity:.75;margin-top:1px}
-.hint{color:var(--dim);font:400 10.6px/1.5 "IBM Plex Sans",sans-serif;margin-bottom:8px}
+.qtab i{display:block;font-style:normal;font:500 8.6px system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;opacity:.75;margin-top:1px}
+.hint{color:var(--dim);font:400 10.6px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;margin-bottom:8px}
 .opt{color:var(--dim);font-weight:500;text-transform:none;letter-spacing:0}
 .req{color:var(--red);font-style:normal;font-weight:700}
 .miss input,.miss select{border-color:var(--red)!important;background:#FFF7F8}
@@ -202,7 +199,7 @@ nav .ic{position:relative;display:block}
   background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:9px 11px;cursor:pointer;
 }
 .check input{width:17px;height:17px;flex:none;accent-color:var(--spark);margin-top:1px}
-.check span{color:var(--paper);font:600 11.6px/1.4 "IBM Plex Sans",sans-serif}
+.check span{color:var(--paper);font:600 11.6px/1.4 system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif}
 .check i{color:var(--dim);font-style:normal;font-weight:400}
 .live{
   background:#fff;border:1px solid var(--line);border-radius:12px;
@@ -211,8 +208,8 @@ nav .ic{position:relative;display:block}
 }
 .live img{height:30px;width:auto;max-width:62px;object-fit:contain;flex:none}
 .live-b{flex:1;min-width:0}
-.live-r{display:block;color:var(--paper);font:700 12.6px "IBM Plex Sans",sans-serif}
-.live-s{display:block;color:var(--dim);font:400 10.6px "IBM Plex Sans",sans-serif;margin-top:1px}
+.live-r{display:block;color:var(--paper);font:700 12.6px system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif}
+.live-s{display:block;color:var(--dim);font:400 10.6px system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;margin-top:1px}
 .addrow{display:flex;gap:8px;margin-bottom:14px}
 .addrow input{
   flex:1;background:#fff;border:1px solid var(--line);border-radius:10px;
@@ -225,26 +222,26 @@ nav .ic{position:relative;display:block}
   border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin-bottom:8px;
   box-shadow:0 6px 16px rgba(16,40,80,.05);
 }
-.dom-n{flex:1;color:var(--paper);font:600 12.6px "IBM Plex Sans",sans-serif}
-.dom-i{color:var(--spark);font:700 10.4px "IBM Plex Mono",monospace}
+.dom-n{flex:1;color:var(--paper);font:600 12.6px system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif}
+.dom-i{color:var(--spark);font:700 10.4px ui-monospace,"SF Mono",Menlo,Consolas,"Roboto Mono",monospace}
 .armed{background:var(--red)!important;color:#fff!important;border-color:var(--red)!important}
 .live-x{
   flex:none;cursor:pointer;border:0;border-radius:9px;background:#FDE8EB;color:#9C0A1C;
-  padding:7px 11px;font:700 10.4px "IBM Plex Sans",sans-serif;
+  padding:7px 11px;font:700 10.4px system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
 }
 
 .jobnav{
   display:flex;align-items:center;justify-content:space-between;
   background:var(--panel);border-radius:12px;padding:9px 11px;margin-bottom:13px;
 }
-.jobnav b{color:var(--paper);font:700 12.4px "IBM Plex Sans",sans-serif}
+.jobnav b{color:var(--paper);font:700 12.4px system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif}
 .jobnav .mini{
   cursor:pointer;border:1px solid var(--line);background:#fff;color:var(--spark-lit);
-  border-radius:8px;padding:5px 10px;font:600 10.6px "IBM Plex Sans",sans-serif;
+  border-radius:8px;padding:5px 10px;font:600 10.6px system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
 }
 .note{
   border-radius:10px;padding:9px 11px;margin-bottom:11px;
-  font:500 11.2px/1.45 "IBM Plex Sans",sans-serif;
+  font:500 11.2px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
 }
 .note.good{background:#E7F6EE;color:#0B6B3E}
 .note.bad{background:#FDE8EB;color:#9C0A1C}
@@ -258,11 +255,11 @@ nav .ic{position:relative;display:block}
 .user img,.user .ini{
   width:44px;height:44px;border-radius:50%;flex:none;object-fit:cover;
   background:var(--panel);display:grid;place-items:center;
-  color:var(--spark);font:700 14px "IBM Plex Sans",sans-serif;border:2px solid var(--panel-2);
+  color:var(--spark);font:700 14px system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;border:2px solid var(--panel-2);
 }
 .user-b{min-width:0}
-.user-n{display:block;color:var(--paper);font:700 12.8px "IBM Plex Sans",sans-serif}
-.user-s{display:block;color:var(--dim);font:400 11px "IBM Plex Sans",sans-serif;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.user-n{display:block;color:var(--paper);font:700 12.8px system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif}
+.user-s{display:block;color:var(--dim);font:400 11px system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .tools{display:flex;gap:8px;margin-bottom:12px}
 .tools .btn{flex:1;padding:9px 10px;font-size:10.8px}
 </style>
