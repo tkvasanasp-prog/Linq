@@ -1,0 +1,1056 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LinQ Admin</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#FFFFFF;
+  --panel:#F3F7FD;
+  --panel-2:#E4EDFA;
+  --line:#D8E2F0;
+  --spark:#0A57D0;
+  --spark-lit:#0742A8;
+  --paper:#0A1A30;
+  --dim:#5B7391;
+  --red:#E4142A;
+  --ok:#0E8A4F;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+[hidden]{display:none!important}
+body{
+  background:var(--ink);color:var(--paper);
+  font:400 13px/1.55 "IBM Plex Sans",system-ui,sans-serif;
+  -webkit-font-smoothing:antialiased;overflow-x:hidden;
+}
+button,input,select,textarea{font-family:inherit}
+
+/* ---------- lock ---------- */
+.lock{
+  position:fixed;inset:0;z-index:50;background:var(--ink);
+  display:flex;align-items:center;justify-content:center;padding:22px;
+}
+.lock-box{width:100%;max-width:330px;text-align:center}
+.lock-t{font:800 24px "IBM Plex Sans",sans-serif;letter-spacing:-.01em}
+.lock-t span{color:var(--spark)}
+.lock-t b{color:var(--red)}
+.lock-s{color:var(--dim);font:400 12.4px "IBM Plex Sans",sans-serif;margin:7px 0 18px}
+.lock input{
+  width:100%;text-align:center;letter-spacing:.14em;
+  background:#fff;border:1px solid var(--line);border-radius:12px;
+  padding:13px 14px;font-size:15px;color:var(--paper);outline:none;
+}
+.lock input:focus{border-color:var(--spark)}
+.lock-err{color:var(--red);font:600 11.4px "IBM Plex Sans",sans-serif;margin-top:9px}
+.lock .btn{margin-top:14px}
+
+/* ---------- frame ---------- */
+.wrap{max-width:430px;margin:0 auto;min-height:100vh;display:flex;flex-direction:column;position:relative}
+
+header{
+  position:sticky;top:0;z-index:8;background:var(--ink);
+  padding:12px 14px 10px;border-bottom:1px solid var(--line);
+  display:flex;align-items:center;justify-content:space-between;gap:10px;
+}
+h1{font:800 17px "IBM Plex Sans",sans-serif;letter-spacing:.01em}
+.bmark span{color:var(--spark)}
+.bmark b{color:var(--red)}
+.tagline{color:var(--dim);font:500 10.4px "IBM Plex Sans",sans-serif;letter-spacing:.08em;text-transform:uppercase}
+
+main{flex:1 0 auto;padding:14px 14px 96px}
+
+nav{
+  position:fixed;left:0;right:0;bottom:0;z-index:9;
+  background:rgba(255,255,255,.97);border-top:1px solid var(--line);
+  display:block;padding:7px 0 9px;backdrop-filter:blur(8px);
+}
+nav .nv{max-width:430px;margin:0 auto;width:100%;display:grid;grid-template-columns:repeat(5,1fr)}
+nav button{
+  background:none;border:0;cursor:pointer;color:var(--dim);
+  display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:4px;
+  font:500 9.4px/1.15 "IBM Plex Sans",sans-serif;padding:2px 0;
+  text-align:center;white-space:nowrap;width:100%;
+}
+nav button.on{color:var(--spark);font-weight:700}
+nav svg{width:20px;height:20px}
+nav .ic{position:relative;display:block}
+.dot{
+  position:absolute;top:-5px;right:-11px;min-width:16px;height:16px;padding:0 4px;
+  border-radius:999px;background:var(--red);color:#fff;
+  font:700 9.4px/16px "IBM Plex Sans",sans-serif;text-align:center;
+  box-shadow:0 0 0 2px #fff;
+}
+.seg{position:relative}
+.seg .dot{top:-6px;right:-4px}
+
+/* ---------- dashboard ---------- */
+.sec{margin-bottom:20px}
+.sec-h{
+  color:var(--paper);font:700 12.4px "IBM Plex Sans",sans-serif;
+  letter-spacing:.03em;text-transform:uppercase;margin-bottom:9px;
+  display:flex;align-items:center;gap:7px;
+}
+.sec-h::before{content:"";width:4px;height:14px;border-radius:2px;background:var(--spark)}
+
+.card{
+  background:#fff;border:1px solid var(--line);border-radius:14px;
+  padding:12px 13px;box-shadow:0 8px 20px rgba(16,40,80,.07);
+  margin-bottom:10px;
+}
+.card-t{color:var(--dim);font:500 10.6px "IBM Plex Sans",sans-serif;letter-spacing:.03em;margin-bottom:9px}
+.quad{display:grid;grid-template-columns:repeat(4,1fr);gap:7px}
+.quad div{background:var(--panel);border-radius:9px;padding:7px 4px;text-align:center}
+.quad b{display:block;color:var(--paper);font:700 15px "IBM Plex Sans",sans-serif}
+.quad span{display:block;color:var(--dim);font:500 8.8px "IBM Plex Sans",sans-serif;letter-spacing:.04em;text-transform:uppercase;margin-top:1px}
+
+.pair{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.stat{
+  background:#fff;border:1px solid var(--line);border-radius:13px;
+  padding:11px 12px;box-shadow:0 7px 18px rgba(16,40,80,.06);
+}
+.stat b{display:block;color:var(--spark);font:800 21px "IBM Plex Sans",sans-serif;line-height:1.1}
+.stat span{display:block;color:var(--dim);font:500 10.4px/1.35 "IBM Plex Sans",sans-serif;margin-top:3px}
+.stat.red b{color:var(--red)}
+.stat.ok b{color:var(--ok)}
+
+/* ---------- leads ---------- */
+.segs{display:flex;gap:7px;margin-bottom:13px}
+.seg{
+  flex:1;cursor:pointer;border-radius:999px;padding:8px 4px;text-align:center;
+  background:#fff;border:1px solid var(--line);color:var(--paper);
+  font:600 11.4px "IBM Plex Sans",sans-serif;
+}
+.seg.on{background:var(--spark);border-color:var(--spark);color:#fff}
+.lead{
+  background:#fff;border:1px solid var(--line);border-left:3px solid var(--spark);
+  border-radius:12px;padding:11px 12px;margin-bottom:9px;
+  box-shadow:0 6px 16px rgba(16,40,80,.06);
+}
+.lead-n{color:var(--paper);font:700 13px "IBM Plex Sans",sans-serif}
+.lead-d{color:var(--dim);font:400 10.6px "IBM Plex Mono",monospace;float:right}
+.lead-r{display:flex;gap:6px;margin-top:5px;font:400 11.4px "IBM Plex Sans",sans-serif;color:var(--dim)}
+.lead-r b{color:var(--paper);font-weight:600}
+.lead-tag{
+  display:inline-block;margin-top:7px;background:var(--panel-2);color:var(--spark-lit);
+  border-radius:999px;padding:3px 9px;font:600 9.8px "IBM Plex Sans",sans-serif;
+}
+.empty{text-align:center;color:var(--dim);padding:46px 10px;font:400 12.4px "IBM Plex Sans",sans-serif}
+.empty b{display:block;color:var(--paper);font:700 15px "IBM Plex Sans",sans-serif;margin-bottom:5px}
+
+/* ---------- forms ---------- */
+.f{display:block;margin-bottom:10px}
+.f span{display:block;color:var(--dim);font:500 10.4px "IBM Plex Sans",sans-serif;letter-spacing:.03em;margin-bottom:4px}
+.f input,.f select,.f textarea{
+  width:100%;background:#fff;border:1px solid var(--line);border-radius:10px;
+  padding:9px 11px;color:var(--paper);font-size:12.6px;outline:none;
+}
+.f input:focus,.f select:focus,.f textarea:focus{border-color:var(--spark)}
+.f textarea{min-height:104px;resize:vertical;line-height:1.5}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+
+.btn{
+  cursor:pointer;border:0;border-radius:999px;background:var(--spark);color:#fff;
+  padding:11px 18px;font:700 12px "IBM Plex Sans",sans-serif;
+  letter-spacing:.05em;text-transform:uppercase;
+  box-shadow:0 10px 24px rgba(10,87,208,.32);
+}
+.btn.ghost{background:var(--panel);color:var(--paper);border:1px solid var(--line);box-shadow:none}
+.btn.wide{display:block;width:100%;text-align:center}
+.btn.danger{background:var(--red);box-shadow:0 10px 24px rgba(228,20,42,.3)}
+.btn:disabled{opacity:.5;cursor:default}
+.row{display:flex;gap:9px;margin-top:12px}
+.row .btn{flex:1}
+
+.pic{
+  display:grid;place-items:center;margin-bottom:11px;
+  width:86px;height:86px;border-radius:16px;cursor:pointer;position:relative;
+  background:var(--panel);border:2px dashed var(--spark);overflow:hidden;
+}
+.pic img{width:100%;height:100%;object-fit:contain;background:#fff}
+.pic span{position:absolute;color:var(--spark);font:600 10px "IBM Plex Sans",sans-serif}
+
+.pt{
+  background:var(--panel);border:1px solid var(--line);border-radius:12px;
+  padding:10px;margin-bottom:9px;
+}
+.pt-h{display:flex;align-items:center;justify-content:space-between;margin-bottom:7px}
+.pt-n{color:var(--spark);font:700 10.4px "IBM Plex Mono",monospace}
+.pt input{background:#fff}
+.pt .f{margin-bottom:7px}
+
+.qbox{margin-top:8px}
+.qtabs{display:flex;gap:6px;margin-bottom:9px}
+.qtab{
+  flex:1;cursor:pointer;border-radius:9px;padding:7px 2px;text-align:center;
+  background:#fff;border:1px solid var(--line);color:var(--paper);
+  font:600 10.6px "IBM Plex Sans",sans-serif;
+}
+.qtab.on{background:var(--spark);border-color:var(--spark);color:#fff}
+.qtab i{display:block;font-style:normal;font:500 8.6px "IBM Plex Sans",sans-serif;opacity:.75;margin-top:1px}
+.hint{color:var(--dim);font:400 10.6px/1.5 "IBM Plex Sans",sans-serif;margin-bottom:8px}
+.opt{color:var(--dim);font-weight:500;text-transform:none;letter-spacing:0}
+.req{color:var(--red);font-style:normal;font-weight:700}
+.miss input,.miss select{border-color:var(--red)!important;background:#FFF7F8}
+.pic.miss{border-color:var(--red);background:#FFF7F8}
+.pic.miss span{color:var(--red)}
+.check{
+  display:flex;align-items:flex-start;gap:9px;margin:-2px 0 12px;
+  background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:9px 11px;cursor:pointer;
+}
+.check input{width:17px;height:17px;flex:none;accent-color:var(--spark);margin-top:1px}
+.check span{color:var(--paper);font:600 11.6px/1.4 "IBM Plex Sans",sans-serif}
+.check i{color:var(--dim);font-style:normal;font-weight:400}
+.live{
+  background:#fff;border:1px solid var(--line);border-radius:12px;
+  padding:10px 12px;margin-bottom:9px;display:flex;align-items:center;gap:11px;
+  box-shadow:0 6px 16px rgba(16,40,80,.06);
+}
+.live img{height:30px;width:auto;max-width:62px;object-fit:contain;flex:none}
+.live-b{flex:1;min-width:0}
+.live-r{display:block;color:var(--paper);font:700 12.6px "IBM Plex Sans",sans-serif}
+.live-s{display:block;color:var(--dim);font:400 10.6px "IBM Plex Sans",sans-serif;margin-top:1px}
+.addrow{display:flex;gap:8px;margin-bottom:14px}
+.addrow input{
+  flex:1;background:#fff;border:1px solid var(--line);border-radius:10px;
+  padding:10px 12px;color:var(--paper);font-size:12.8px;outline:none;
+}
+.addrow input:focus{border-color:var(--spark)}
+.addrow .btn{padding:10px 18px}
+.dom{
+  display:flex;align-items:center;gap:10px;background:#fff;
+  border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin-bottom:8px;
+  box-shadow:0 6px 16px rgba(16,40,80,.05);
+}
+.dom-n{flex:1;color:var(--paper);font:600 12.6px "IBM Plex Sans",sans-serif}
+.dom-i{color:var(--spark);font:700 10.4px "IBM Plex Mono",monospace}
+.armed{background:var(--red)!important;color:#fff!important;border-color:var(--red)!important}
+.live-x{
+  flex:none;cursor:pointer;border:0;border-radius:9px;background:#FDE8EB;color:#9C0A1C;
+  padding:7px 11px;font:700 10.4px "IBM Plex Sans",sans-serif;
+}
+
+.jobnav{
+  display:flex;align-items:center;justify-content:space-between;
+  background:var(--panel);border-radius:12px;padding:9px 11px;margin-bottom:13px;
+}
+.jobnav b{color:var(--paper);font:700 12.4px "IBM Plex Sans",sans-serif}
+.jobnav .mini{
+  cursor:pointer;border:1px solid var(--line);background:#fff;color:var(--spark-lit);
+  border-radius:8px;padding:5px 10px;font:600 10.6px "IBM Plex Sans",sans-serif;
+}
+.note{
+  border-radius:10px;padding:9px 11px;margin-bottom:11px;
+  font:500 11.2px/1.45 "IBM Plex Sans",sans-serif;
+}
+.note.good{background:#E7F6EE;color:#0B6B3E}
+.note.bad{background:#FDE8EB;color:#9C0A1C}
+
+/* ---------- users ---------- */
+.user{
+  display:flex;align-items:center;gap:11px;background:#fff;
+  border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin-bottom:9px;
+  box-shadow:0 6px 16px rgba(16,40,80,.06);
+}
+.user img,.user .ini{
+  width:44px;height:44px;border-radius:50%;flex:none;object-fit:cover;
+  background:var(--panel);display:grid;place-items:center;
+  color:var(--spark);font:700 14px "IBM Plex Sans",sans-serif;border:2px solid var(--panel-2);
+}
+.user-b{min-width:0}
+.user-n{display:block;color:var(--paper);font:700 12.8px "IBM Plex Sans",sans-serif}
+.user-s{display:block;color:var(--dim);font:400 11px "IBM Plex Sans",sans-serif;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tools{display:flex;gap:8px;margin-bottom:12px}
+.tools .btn{flex:1;padding:9px 10px;font-size:10.8px}
+</style>
+</head>
+<body>
+<div class="lock" id="lock">
+  <div class="lock-box">
+    <h2 class="lock-t"><span>Lin</span><b>Q</b> Admin</h2>
+    <p class="lock-s">Enter the admin password to continue.</p>
+    <input id="lockPin" type="password" inputmode="text" autocomplete="current-password" placeholder="Password">
+    <p class="lock-err" id="lockErr" hidden>Wrong password. Try again.</p>
+    <button type="button" class="btn wide" id="lockGo">Unlock</button>
+  </div>
+</div>
+
+<div class="wrap" id="app" hidden>
+
+  <header>
+    <div>
+      <h1 class="bmark"><span>Lin</span><b>Q</b> Admin</h1>
+      <span class="tagline" id="crumb">Dashboard</span>
+    </div>
+  </header>
+
+  <main>
+    <!-- ============ DASHBOARD ============ -->
+    <section id="pgDash">
+      <div class="sec">
+        <div class="sec-h">Shares</div>
+        <div class="card">
+          <p class="card-t">Times the website was shared</p>
+          <div class="quad" id="qShare"></div>
+        </div>
+      </div>
+
+      <div class="sec">
+        <div class="sec-h">Visitors</div>
+        <div class="card">
+          <p class="card-t">People who opened the website</p>
+          <div class="quad" id="qVisit"></div>
+        </div>
+        <div class="pair">
+          <div class="stat"><b id="sNew">0</b><span>New users</span></div>
+          <div class="stat"><b id="sOld">0</b><span>Returning users</span></div>
+        </div>
+      </div>
+
+      <div class="sec">
+        <div class="sec-h">What users do</div>
+        <div class="pair">
+          <div class="stat"><b id="sDone">0</b><span>Finished all jobs, waiting for new uploads</span></div>
+          <div class="stat"><b id="sJobQ">0</b><span>Opened a job's own interview questions</span></div>
+          <div class="stat"><b id="sQaPage">0</b><span>Opened the Interview Q&amp;A page</span></div>
+          <div class="stat"><b id="sQaNext">0</b><span>Moved through questions with Next</span></div>
+          <div class="stat"><b id="sProfile">0</b><span>Created a profile</span></div>
+          <div class="stat ok"><b id="sYes">0</b><span>Said YES to the training ad</span></div>
+          <div class="stat red"><b id="sNo">0</b><span>Said NO to the training ad</span></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ LEADS ============ -->
+    <section id="pgLeads" hidden>
+      <div class="segs">
+        <button type="button" class="seg on" data-seg="basic">Basic leads<span class="dot" id="dotBasic" hidden>0</span></button>
+        <button type="button" class="seg" data-seg="quality">Quality leads<span class="dot" id="dotQuality" hidden>0</span></button>
+      </div>
+      <p class="hint" id="leadHint"></p>
+      <div class="tools">
+        <button type="button" class="btn ghost" id="leadCsv">Download CSV</button>
+      </div>
+      <div id="leadList"></div>
+    </section>
+
+    <!-- ============ UPLOAD JOBS ============ -->
+    <section id="pgJobs" hidden>
+      <div class="segs">
+        <button type="button" class="seg on" data-jseg="new">Upload new jobs</button>
+        <button type="button" class="seg" data-jseg="live">Uploaded jobs</button>
+      </div>
+
+      <div id="jobNote"></div>
+
+      <!-- ---- upload new ---- -->
+      <div id="jNewWrap">
+        <div class="jobnav">
+          <button type="button" class="mini" id="jPrev">&lsaquo; Prev</button>
+          <b id="jCount">Job 1 of 1</b>
+          <button type="button" class="mini" id="jNext">Next &rsaquo;</button>
+        </div>
+
+        <div class="sec-h">Company logo <i class="req">*</i></div>
+        <label class="pic" for="jLogo" id="jPicWrap">
+          <img id="jPic" alt="" hidden>
+          <span id="jPicTxt">Add logo</span>
+        </label>
+        <input type="file" id="jLogo" accept="image/*" hidden>
+
+        <label class="f"><span>Role <i class="req">*</i></span><input id="jRole" type="text" placeholder="e.g. Data Analyst Trainee"></label>
+
+        <label class="f"><span>Last date <i class="req">*</i></span><input id="jLast" type="date"></label>
+        <label class="check"><input type="checkbox" id="jNoDate"><span>Not mentioned &nbsp;<i>— the job then closes one month after publishing</i></span></label>
+
+        <label class="f"><span>Apply link <i class="req">*</i> ( opens when a user taps Apply )</span><input id="jLink" type="url" placeholder="https://..."></label>
+
+        <div class="sec-h" style="margin-top:16px">Job details — 10 points <span class="opt">( optional )</span></div>
+        <p class="hint">Last date is always shown as the first point. Fill only the points you need — empty boxes are skipped.</p>
+        <div id="jPoints"></div>
+
+        <div class="sec-h" style="margin-top:16px">Interview questions <span class="opt">( optional )</span></div>
+        <p class="hint">If you skip this, the blue INTERVIEW QUESTIONS button will not appear on that job.</p>
+        <button type="button" class="btn ghost wide" id="jQToggle">Upload interview questions</button>
+
+        <div class="qbox" id="jQBox" hidden>
+          <div class="qtabs">
+            <button type="button" class="qtab on" data-q="rep">Repeated</button>
+            <button type="button" class="qtab" data-q="bas">Basic</button>
+            <button type="button" class="qtab" data-q="exp">Expecting</button>
+          </div>
+          <p class="hint">Paste all 34 questions with their answers in one go.</p>
+          <label class="f"><span id="qLabel">Repeated questions</span><textarea id="jQText" placeholder="1. What is SQL?&#10;SQL is a language used to query databases.&#10;&#10;2. What is a join?&#10;A join combines rows from two tables."></textarea></label>
+          <button type="button" class="btn wide" id="jQSave">Save these questions</button>
+        </div>
+
+        <div class="row">
+          <button type="button" class="btn ghost" id="jDel">Delete job</button>
+          <button type="button" class="btn" id="jAdd">Add next job</button>
+        </div>
+        <button type="button" class="btn wide danger" id="jPublish" style="margin-top:11px">Publish all jobs</button>
+        <p class="hint" style="margin-top:9px" id="jSaved"></p>
+      </div>
+
+      <!-- ---- already uploaded ---- -->
+      <div id="jLiveWrap" hidden>
+        <p class="hint" id="liveHint"></p>
+        <div id="jLiveList"></div>
+      </div>
+    </section>
+
+    <!-- ============ DOMAINS ============ -->
+    <section id="pgDomains" hidden>
+      <p class="hint">These are the domains a student can pick in the training form on the website.</p>
+      <div class="addrow">
+        <input id="domNew" type="text" placeholder="New domain name">
+        <button type="button" class="btn" id="domAdd">Add</button>
+      </div>
+      <div id="domList"></div>
+      <p class="hint" id="domNote" style="margin-top:10px"></p>
+    </section>
+
+    <!-- ============ USERS ============ -->
+    <section id="pgUsers" hidden>
+      <p class="hint" id="userHint"></p>
+      <div class="tools">
+        <button type="button" class="btn ghost" id="userCsv">Download CSV</button>
+      </div>
+      <div id="userList"></div>
+    </section>
+  </main>
+
+  <nav>
+    <div class="nv">
+      <button type="button" class="on" data-pg="dash">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="3.5" width="7" height="7" rx="1.6"/><rect x="13.5" y="3.5" width="7" height="7" rx="1.6"/><rect x="3.5" y="13.5" width="7" height="7" rx="1.6"/><rect x="13.5" y="13.5" width="7" height="7" rx="1.6"/></svg>
+        Dashboard
+      </button>
+      <button type="button" data-pg="leads">
+        <span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6.5h16v11H4z"/><path d="m4 7.5 8 5.5 8-5.5"/></svg><span class="dot" id="dotLeads" hidden>0</span></span>
+        Leads
+      </button>
+      <button type="button" data-pg="jobs">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 16V5"/><path d="m7.5 9.5 4.5-4.5 4.5 4.5"/><path d="M4.5 19.5h15"/></svg>
+        Upload
+      </button>
+      <button type="button" data-pg="users">
+        <span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8.5" r="3.6"/><path d="M4.8 20c.8-3.6 3.7-5.6 7.2-5.6s6.4 2 7.2 5.6"/></svg><span class="dot" id="dotUsers" hidden>0</span></span>
+        Users
+      </button>
+      <button type="button" data-pg="domains">
+        <span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 6.5h15M4.5 12h15M4.5 17.5h15"/><circle cx="8" cy="6.5" r="1.6" fill="currentColor" stroke="none"/><circle cx="13.5" cy="12" r="1.6" fill="currentColor" stroke="none"/><circle cx="10" cy="17.5" r="1.6" fill="currentColor" stroke="none"/></svg></span>
+        Domains
+      </button>
+    </div>
+  </nav>
+</div>
+
+<script>
+/* ================= admin password ================= */
+// Change this to your own password before you publish the site.
+const ADMIN_PASSWORD = 'linq@2026';
+
+(function(){
+  const lock = document.getElementById('lock');
+  const app  = document.getElementById('app');
+  const pin  = document.getElementById('lockPin');
+  const err  = document.getElementById('lockErr');
+
+  function open(){
+    lock.hidden = true;
+    app.hidden = false;
+    try{ sessionStorage.setItem('linq_admin','1'); }catch(e){}
+  }
+  try{ if(sessionStorage.getItem('linq_admin')==='1') open(); }catch(e){}
+
+  function tryPin(){
+    if(pin.value === ADMIN_PASSWORD){ err.hidden = true; open(); }
+    else { err.hidden = false; pin.value = ''; pin.focus(); }
+  }
+  document.getElementById('lockGo').addEventListener('click', tryPin);
+  pin.addEventListener('keydown', e=>{ if(e.key === 'Enter'){ e.preventDefault(); tryPin(); } });
+})();
+
+/* ================= api ================= */
+const API = (() => {
+  const ends = ['/api', '/.netlify/functions/api', 'api.php'];
+  let base = null;
+  async function call(kind, body){
+    const tries = base ? [base] : ends;
+    for(const b of tries){
+      try{
+        const r = await fetch(b + '?kind=' + kind, body ? {
+          method:'POST', headers:{'content-type':'application/json'}, body:JSON.stringify(body)
+        } : {cache:'no-store'});
+        if(!r.ok) continue;
+        const j = await r.json();
+        base = b;
+        return j;
+      }catch(e){ /* try next */ }
+    }
+    return null;
+  }
+  return {call};
+})();
+
+const local = {
+  get(k,f){ try{ const v=JSON.parse(localStorage.getItem(k)); return v==null?f:v; }catch(e){ return f; } },
+  set(k,v){ try{ localStorage.setItem(k,JSON.stringify(v)); }catch(e){} }
+};
+const esc = t => String(t==null?'':t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+/* ================= tabs ================= */
+const pages = {dash:'pgDash', leads:'pgLeads', jobs:'pgJobs', users:'pgUsers', domains:'pgDomains'};
+const names = {dash:'Dashboard', leads:'Leads', jobs:'Upload jobs', users:'Manage users', domains:'Domains'};
+let page = 'dash';
+
+document.querySelectorAll('nav button').forEach(b=>{
+  b.addEventListener('click',()=>{
+    page = b.dataset.pg;
+    document.querySelectorAll('nav button').forEach(x=>x.classList.toggle('on',x===b));
+    Object.keys(pages).forEach(k=>{ document.getElementById(pages[k]).hidden = (k!==page); });
+    document.getElementById('crumb').textContent = names[page];
+    window.scrollTo(0,0);
+    loadPage();
+  });
+});
+
+function loadPage(){
+  if(page==='dash') loadDash();
+  if(page==='leads') loadLeads();
+  if(page==='users') loadUsers();
+  if(page==='jobs') drawJob();
+  if(page==='domains') loadDomains();
+}
+
+/* ================= dashboard ================= */
+const zero = {today:0,week:0,month:0,total:0};
+
+function quad(el, s){
+  el.innerHTML =
+    '<div><b>'+s.today+'</b><span>Today</span></div>'+
+    '<div><b>'+s.week+'</b><span>Week</span></div>'+
+    '<div><b>'+s.month+'</b><span>Month</span></div>'+
+    '<div><b>'+s.total+'</b><span>Total</span></div>';
+}
+
+async function loadDash(){
+  const res = await API.call('stats');
+  const s = (res && res.stats) || {};
+  const g = k => s[k] || zero;
+  quad(document.getElementById('qShare'), g('share'));
+  quad(document.getElementById('qVisit'), g('visit'));
+  const put = (id,v)=>{ document.getElementById(id).textContent = v; };
+  put('sNew', g('user_new').total);
+  put('sOld', g('user_old').total);
+  put('sDone', g('jobs_done').total);
+  put('sJobQ', g('job_questions').total);
+  put('sQaPage', g('qa_page').total);
+  put('sQaNext', g('qa_next').total);
+  put('sProfile', g('profile').total);
+  put('sYes', g('lead_yes').total);
+  put('sNo', g('lead_no').total);
+}
+
+/* ================= unread badges ================= */
+const SEEN = {
+  get(k){ return local.get('linq_seen_'+k, 0); },
+  set(k,n){ local.set('linq_seen_'+k, n); }
+};
+function badge(id, n){
+  const el = document.getElementById(id);
+  if(!el) return;
+  el.hidden = !(n>0);
+  el.textContent = n > 99 ? '99+' : n;
+}
+async function refreshBadges(){
+  const [lr, ur] = await Promise.all([API.call('leads'), API.call('users')]);
+  const leads = (lr && lr.leads) || [];
+  const users = (ur && ur.users) || [];
+  leadCache = leads;
+  userCache = users;
+  const basic = leads.filter(l=>l.kind!=='quality').length;
+  const quality = leads.filter(l=>l.kind==='quality').length;
+  const nb = Math.max(0, basic - SEEN.get('basic'));
+  const nq = Math.max(0, quality - SEEN.get('quality'));
+  const nu = Math.max(0, users.length - SEEN.get('users'));
+  badge('dotBasic', nb);
+  badge('dotQuality', nq);
+  badge('dotLeads', nb + nq);
+  badge('dotUsers', nu);
+}
+
+/* ================= leads ================= */
+let seg = 'basic', leadCache = [];
+
+document.querySelectorAll('.seg[data-seg]').forEach(b=>{
+  b.addEventListener('click',()=>{
+    seg = b.dataset.seg;
+    document.querySelectorAll('.seg[data-seg]').forEach(x=>x.classList.toggle('on',x===b));
+    drawLeads();
+  });
+});
+
+async function loadLeads(){
+  const res = await API.call('leads');
+  leadCache = (res && res.leads) || leadCache;
+  drawLeads();
+}
+
+function drawLeads(){
+  const list = leadCache.filter(l => (l.kind==='quality') === (seg==='quality')).slice().reverse();
+
+  // opening a segment clears its badge
+  SEEN.set(seg, leadCache.filter(l => (l.kind==='quality') === (seg==='quality')).length);
+  refreshBadges();
+
+  document.getElementById('leadHint').textContent = seg==='quality'
+    ? list.length + ' quality lead' + (list.length===1?'':'s') + ' — from the Placements page, newest first.'
+    : list.length + ' basic lead' + (list.length===1?'':'s') + ' — from the training ad, newest first.';
+
+  const box = document.getElementById('leadList');
+  if(!list.length){
+    box.innerHTML = '<div class="empty"><b>No '+(seg==='quality'?'quality':'basic')+' leads yet</b>They will appear here as soon as a student submits the form.</div>';
+    return;
+  }
+  box.innerHTML = list.map((l,i)=>{
+    const row = (k,v)=> v ? '<div class="lead-r">'+k+': <b>'+esc(v)+'</b></div>' : '';
+    const d = l.at ? new Date(l.at) : null;
+    const when = (d && !isNaN(d))
+      ? d.toLocaleDateString() + ' · ' + d.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})
+      : '';
+    const tag = seg==='quality'
+      ? (l.program||l.company ? '<span class="lead-tag">Program: '+esc(l.program||l.company)+'</span>' : '')
+      : (l.company ? '<span class="lead-tag">Interested in '+esc(l.company)+'&rsquo;s direct job training</span>' : '');
+    return '<div class="lead">'+
+      '<span class="lead-d">'+esc(when)+'</span>'+
+      '<span class="lead-n">'+esc(l.name||'No name')+'</span>'+
+      row('WhatsApp', l.whatsapp)+
+      row('Email', l.email)+
+      row('Education', l.education)+
+      row('10th marks', l.marks)+
+      row('Domain', l.domain)+
+      row('Language', l.language)+
+      row('Location', l.location)+
+      tag+
+    '</div>';
+  }).join('');
+}
+
+document.getElementById('leadCsv').addEventListener('click',()=>{
+  const list = leadCache.filter(l => (l.kind==='quality') === (seg==='quality'));
+  const head = ['Date','Name','WhatsApp','Email','Education','10th marks','Domain','Location','Language','Program / Interested in'];
+  const cell = v => '"'+String(v==null?'':v).replace(/"/g,'""')+'"';
+  const rows = [head.map(cell).join(',')];
+  list.forEach(l=>rows.push([l.at,l.name,l.whatsapp,l.email,l.education,l.marks,l.domain,l.location,l.language,l.program||l.company].map(cell).join(',')));
+  download('linq-'+seg+'-leads.csv', rows.join('\n'), 'text/csv');
+});
+
+/* ================= users ================= */
+let userCache = [];
+
+async function loadUsers(){
+  const res = await API.call('users');
+  userCache = (res && res.users) || userCache;
+  SEEN.set('users', userCache.length);
+  refreshBadges();
+  const box = document.getElementById('userList');
+  document.getElementById('userHint').textContent = userCache.length + ' profile' + (userCache.length===1?'':'s') + ' created on the website.';
+  if(!userCache.length){
+    box.innerHTML = '<div class="empty"><b>No profiles yet</b>Profiles created in "My profile" show up here.</div>';
+    return;
+  }
+  box.innerHTML = userCache.slice().reverse().map(u=>{
+    const ini = (u.name||'?').trim().split(/\s+/).slice(0,2).map(w=>w[0]).join('').toUpperCase();
+    return '<div class="user">'+
+      (u.photo ? '<img src="'+esc(u.photo)+'" alt="">' : '<span class="ini">'+esc(ini)+'</span>')+
+      '<span class="user-b">'+
+        '<span class="user-n">'+esc(u.name||'No name')+'</span>'+
+        '<span class="user-s">'+esc(u.phone||'')+(u.email?' · '+esc(u.email):'')+'</span>'+
+        '<span class="user-s">'+esc(u.education||'')+'</span>'+
+      '</span>'+
+    '</div>';
+  }).join('');
+}
+
+document.getElementById('userCsv').addEventListener('click',()=>{
+  const head = ['Created','Name','Phone','Email','Education'];
+  const cell = v => '"'+String(v==null?'':v).replace(/"/g,'""')+'"';
+  const rows = [head.map(cell).join(',')];
+  userCache.forEach(u=>rows.push([u.at,u.name,u.phone,u.email,u.education].map(cell).join(',')));
+  download('linq-users.csv', rows.join('\n'), 'text/csv');
+});
+
+/* ================= domains ================= */
+let domList = [];
+
+const DEFAULT_DOMAINS = ['Data analyst','Data engineer','Networking engineer','Testing and automation',
+  'Python developer','Tableau developer','AI engineer','Power BI developer','Cloud engineer','DevOps engineer'];
+
+async function loadDomains(){
+  const res = await API.call('domains');
+  if(!res){
+    domList = local.get('linq_domains_local', DEFAULT_DOMAINS.slice());
+    drawDomains();
+    document.getElementById('domNote').textContent =
+      'Offline preview — the server is not reachable, so changes are kept on this device only.';
+    return;
+  }
+  domList = (res.domains && res.domains.length) ? res.domains : DEFAULT_DOMAINS.slice();
+  drawDomains();
+  // first visit: store the starting list so the site and the panel share one source
+  if(!local.get('linq_dom_saved', false) && domList.length){
+    const out = await API.call('domains', {domains: domList});
+    if(out && out.ok){
+      local.set('linq_dom_saved', true);
+      document.getElementById('domNote').textContent =
+        'Connected — the website now reads this list.';
+    }
+  }
+}
+
+function drawDomains(){
+  const box = document.getElementById('domList');
+  if(!domList.length){
+    box.innerHTML = '<div class="empty"><b>No domains</b>Add one above and students will see it in the training form.</div>';
+    return;
+  }
+  box.innerHTML = domList.map((d,i)=>
+    '<div class="dom">'+
+      '<span class="dom-i">'+(i+1)+'</span>'+
+      '<span class="dom-n">'+esc(d)+'</span>'+
+      '<button type="button" class="live-x" data-dom="'+i+'">Remove</button>'+
+    '</div>').join('');
+  box.querySelectorAll('[data-dom]').forEach(b=>{
+    b.addEventListener('click', async ()=>{
+      const i = +b.dataset.dom;
+      if(b.dataset.armed !== '1'){
+        box.querySelectorAll('[data-dom]').forEach(x=>{ x.dataset.armed='0'; x.textContent='Remove'; x.classList.remove('armed'); });
+        b.dataset.armed = '1';
+        b.textContent = 'Tap to confirm';
+        b.classList.add('armed');
+        setTimeout(()=>{ if(b.dataset.armed==='1'){ b.dataset.armed='0'; b.textContent='Remove'; b.classList.remove('armed'); } }, 4000);
+        return;
+      }
+      domList.splice(i,1);
+      await saveDomains();
+    });
+  });
+}
+
+async function saveDomains(){
+  local.set('linq_domains_local', domList);
+  const out = await API.call('domains', {domains: domList});
+  const note = document.getElementById('domNote');
+  if(out && out.ok){
+    domList = out.domains || domList;
+    note.textContent = 'Saved — students now see ' + domList.length + ' domain' + (domList.length===1?'':'s') + '.';
+  }else{
+    note.textContent = 'Saved on this device. Host the site with the functions enabled so the website reads it too.';
+  }
+  drawDomains();
+}
+
+document.getElementById('domAdd').addEventListener('click', async ()=>{
+  const inp = document.getElementById('domNew');
+  const v = (inp.value||'').trim();
+  if(!v) return;
+  if(domList.indexOf(v) > -1){ inp.value=''; return; }
+  domList.push(v);
+  inp.value = '';
+  await saveDomains();
+});
+document.getElementById('domNew').addEventListener('keydown',e=>{
+  if(e.key==='Enter'){ e.preventDefault(); document.getElementById('domAdd').click(); }
+});
+
+function download(name, text, type){
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([text],{type:type+';charset=utf-8'}));
+  a.download = name;
+  a.click();
+  setTimeout(()=>URL.revokeObjectURL(a.href), 4000);
+}
+
+/* ================= upload jobs ================= */
+const BLANK = () => ({
+  role:'', last:'', noDate:false, link:'', logo:'',
+  points:[{k:'',v:''},{k:'',v:''},{k:'',v:''},{k:'',v:''},{k:'',v:''},
+          {k:'',v:''},{k:'',v:''},{k:'',v:''},{k:'',v:''},{k:'',v:''}],
+  qs:{rep:[],bas:[],exp:[]}
+});
+
+let drafts = local.get('linq_drafts', [BLANK()]);
+let at = 0, qTab = 'rep', jobSeg = 'new', liveJobs = [];
+if(!drafts.length) drafts = [BLANK()];
+if(!drafts[0].points) drafts = [BLANK()];
+
+document.querySelectorAll('[data-jseg]').forEach(b=>{
+  b.addEventListener('click',()=>{
+    jobSeg = b.dataset.jseg;
+    document.querySelectorAll('[data-jseg]').forEach(x=>x.classList.toggle('on',x===b));
+    document.getElementById('jNewWrap').hidden = (jobSeg!=='new');
+    document.getElementById('jLiveWrap').hidden = (jobSeg!=='live');
+    window.scrollTo(0,0);
+    if(jobSeg==='live') loadLive();
+  });
+});
+
+function saveDrafts(){
+  local.set('linq_drafts', drafts);
+  document.getElementById('jSaved').textContent =
+    'Draft saved on this device · ' + drafts.length + ' job' + (drafts.length===1?'':'s') + ' waiting to publish.';
+}
+
+function drawPoints(){
+  const j = drafts[at];
+  document.getElementById('jPoints').innerHTML = j.points.map((p,i)=>
+    '<div class="pt">'+
+      '<div class="pt-h"><span class="pt-n">POINT '+(i+1)+'</span></div>'+
+      '<label class="f"><span>Title</span><input data-p="'+i+'" data-f="k" type="text" value="'+esc(p.k)+'" placeholder="e.g. Location"></label>'+
+      '<label class="f"><span>Content</span><input data-p="'+i+'" data-f="v" type="text" value="'+esc(p.v)+'" placeholder="e.g. Chennai"></label>'+
+    '</div>').join('');
+  document.querySelectorAll('#jPoints input').forEach(inp=>{
+    inp.addEventListener('input',()=>{
+      drafts[at].points[+inp.dataset.p][inp.dataset.f] = inp.value;
+      saveDrafts();
+    });
+  });
+}
+
+function drawJob(){
+  const j = drafts[at];
+  document.getElementById('jCount').textContent = 'Job ' + (at+1) + ' of ' + drafts.length;
+  document.getElementById('jRole').value = j.role;
+  document.getElementById('jLast').value = j.last;
+  document.getElementById('jLast').disabled = !!j.noDate;
+  document.getElementById('jNoDate').checked = !!j.noDate;
+  document.getElementById('jLink').value = j.link;
+  const pic = document.getElementById('jPic'), txt = document.getElementById('jPicTxt');
+  if(j.logo){ pic.src = j.logo; pic.hidden = false; txt.hidden = true; }
+  else { pic.hidden = true; txt.hidden = false; }
+  drawPoints();
+  document.getElementById('jQText').value = j.qs[qTab] || '';
+  document.querySelectorAll('#jNewWrap .miss').forEach(el=>el.classList.remove('miss'));
+  saveDrafts();
+}
+
+['jRole','jLast','jLink'].forEach(id=>{
+  const key = {jRole:'role', jLast:'last', jLink:'link'}[id];
+  document.getElementById(id).addEventListener('input',e=>{
+    drafts[at][key] = e.target.value;
+    markMissing();
+    saveDrafts();
+  });
+});
+
+document.getElementById('jNoDate').addEventListener('change',e=>{
+  drafts[at].noDate = e.target.checked;
+  if(e.target.checked) drafts[at].last = '';
+  drawJob();
+});
+
+document.getElementById('jLogo').addEventListener('change',e=>{
+  const f = e.target.files && e.target.files[0];
+  if(!f) return;
+  const fr = new FileReader();
+  fr.onload = () => {
+    const im = new Image();
+    im.onload = () => {
+      const max = 240, sc = Math.min(1, max/Math.max(im.width, im.height));
+      const c = document.createElement('canvas');
+      c.width = Math.round(im.width*sc); c.height = Math.round(im.height*sc);
+      const ctx = c.getContext('2d');
+      ctx.fillStyle = '#fff'; ctx.fillRect(0,0,c.width,c.height);
+      ctx.drawImage(im,0,0,c.width,c.height);
+      drafts[at].logo = c.toDataURL('image/png');
+      drawJob();
+      markMissing();
+    };
+    im.src = fr.result;
+  };
+  fr.readAsDataURL(f);
+});
+
+function missingOf(j){
+  const out = [];
+  if(!j.logo) out.push('company logo');
+  if(!(j.role||'').trim()) out.push('role');
+  if(!j.noDate && !j.last) out.push('last date');
+  if(!(j.link||'').trim()) out.push('apply link');
+  return out;
+}
+
+function markMissing(){
+  const j = drafts[at];
+  const set = (el,bad)=>{ if(el) el.classList.toggle('miss', !!bad); };
+  set(document.getElementById('jPicWrap'), !j.logo);
+  set(document.getElementById('jRole').closest('.f'), !(j.role||'').trim());
+  set(document.getElementById('jLast').closest('.f'), !j.noDate && !j.last);
+  set(document.getElementById('jLink').closest('.f'), !(j.link||'').trim());
+}
+
+function guard(){
+  const miss = missingOf(drafts[at]);
+  if(!miss.length) return true;
+  markMissing();
+  const list = miss.length === 1 ? miss[0]
+    : miss.slice(0,-1).join(', ') + ' and ' + miss[miss.length-1];
+  note('bad','Please add the ' + list + ' for this job first.');
+  return false;
+}
+
+document.getElementById('jPrev').addEventListener('click',()=>{ if(at>0){ at--; drawJob(); window.scrollTo(0,0); } });
+document.getElementById('jNext').addEventListener('click',()=>{
+  if(at<drafts.length-1){ if(!guard())return; at++; drawJob(); window.scrollTo(0,0); }
+});
+document.getElementById('jAdd').addEventListener('click',()=>{
+  if(!guard())return;
+  drafts.push(BLANK()); at = drafts.length-1; drawJob(); window.scrollTo(0,0);
+});
+let delArmed = false;
+document.getElementById('jDel').addEventListener('click',(e)=>{
+  const btn = e.currentTarget;
+  if(!delArmed){
+    delArmed = true;
+    btn.textContent = 'Tap to confirm';
+    btn.classList.add('armed');
+    setTimeout(()=>{ if(delArmed){ delArmed=false; btn.textContent='Delete job'; btn.classList.remove('armed'); } }, 4000);
+    return;
+  }
+  delArmed = false;
+  btn.textContent = 'Delete job';
+  btn.classList.remove('armed');
+  drafts.splice(at,1);
+  if(!drafts.length) drafts = [BLANK()];
+  at = Math.max(0, at-1);
+  drawJob();
+});
+
+document.getElementById('jQToggle').addEventListener('click',()=>{
+  const box = document.getElementById('jQBox');
+  box.hidden = !box.hidden;
+  document.getElementById('jQToggle').textContent = box.hidden ? 'Upload interview questions' : 'Hide interview questions';
+});
+
+document.querySelectorAll('.qtab').forEach(b=>{
+  b.addEventListener('click',()=>{
+    drafts[at].qs[qTab] = document.getElementById('jQText').value;
+    qTab = b.dataset.q;
+    document.querySelectorAll('.qtab').forEach(x=>x.classList.toggle('on',x===b));
+    document.getElementById('qLabel').textContent =
+      ({rep:'Repeated questions', bas:'Basic questions', exp:'Expecting questions'})[qTab];
+    document.getElementById('jQText').value = drafts[at].qs[qTab] || '';
+    saveDrafts();
+  });
+});
+
+document.getElementById('jQSave').addEventListener('click',()=>{
+  drafts[at].qs[qTab] = document.getElementById('jQText').value;
+  saveDrafts();
+  note('good', ({rep:'Repeated', bas:'Basic', exp:'Expecting'})[qTab] + ' questions saved for this job.');
+});
+
+function note(kind, text){
+  const box = document.getElementById('jobNote');
+  box.innerHTML = '<div class="note '+kind+'">'+esc(text)+'</div>';
+  window.scrollTo(0,0);
+  setTimeout(()=>{ box.innerHTML=''; }, 6000);
+}
+
+function hasQs(j){
+  const q = j.qs || {};
+  return !!((q.rep&&q.rep.trim()) || (q.bas&&q.bas.trim()) || (q.exp&&q.exp.trim()));
+}
+
+document.getElementById('jPublish').addEventListener('click', async ()=>{
+  drafts[at].qs[qTab] = document.getElementById('jQText').value;
+  const bad = drafts.findIndex(j => missingOf(j).length);
+  if(bad > -1){
+    at = bad; drawJob(); markMissing();
+    const miss = missingOf(drafts[bad]);
+    const list = miss.length === 1 ? miss[0] : miss.slice(0,-1).join(', ') + ' and ' + miss[miss.length-1];
+    note('bad','Job ' + (bad+1) + ' still needs the ' + list + '.');
+    return;
+  }
+  const ready = drafts.slice();
+  const btn = document.getElementById('jPublish');
+  btn.disabled = true; btn.textContent = 'Publishing…';
+
+  const res = await API.call('jobs');
+  const live = (res && res.jobs) || [];
+  const stamp = Date.now();
+  const add = ready.map((j,i)=>({
+    id: 'a'+stamp+'_'+i,
+    role: j.role, logo: j.logo, link: j.link,
+    closes: j.noDate ? '' : j.last,
+    noDate: !!j.noDate,
+    points: j.points.filter(p=>p.k && p.v),
+    qs: hasQs(j) ? j.qs : null,
+    at: new Date().toISOString()
+  }));
+  const out = await API.call('jobs', {jobs: live.concat(add)});
+
+  btn.disabled = false; btn.textContent = 'Publish all jobs';
+  if(out && out.ok){
+    drafts = [BLANK()]; at = 0; drawJob();
+    note('good', add.length + ' job' + (add.length===1?'':'s') + ' published. They are live on the website now.');
+  }else{
+    note('bad','Could not reach the server. Deploy the site with the functions enabled, then publish again.');
+  }
+});
+
+/* ---- already uploaded ---- */
+async function loadLive(){
+  const res = await API.call('jobs');
+  liveJobs = (res && res.jobs) || [];
+  const box = document.getElementById('jLiveList');
+  document.getElementById('liveHint').textContent =
+    liveJobs.length ? liveJobs.length + ' job' + (liveJobs.length===1?'':'s') + ' live on the website.'
+                    : '';
+  if(!liveJobs.length){
+    box.innerHTML = '<div class="empty"><b>No jobs uploaded yet</b>Publish a job and it will be listed here.</div>';
+    return;
+  }
+  box.innerHTML = liveJobs.slice().reverse().map((j,i)=>{
+    const when = j.noDate || !j.closes ? 'Closes one month after posting'
+                                       : 'Last date ' + new Date(j.closes).toDateString().slice(4);
+    return '<div class="live">'+
+      (j.logo ? '<img src="'+esc(j.logo)+'" alt="">' : '')+
+      '<span class="live-b">'+
+        '<span class="live-r">'+esc(j.role||'No role')+'</span>'+
+        '<span class="live-s">'+esc(when)+(j.qs?' · questions added':'')+'</span>'+
+      '</span>'+
+      '<button type="button" class="live-x" data-del="'+esc(j.id)+'">Delete</button>'+
+    '</div>';
+  }).join('');
+  box.querySelectorAll('[data-del]').forEach(b=>{
+    b.addEventListener('click', async ()=>{
+      if(b.dataset.armed !== '1'){
+        box.querySelectorAll('[data-del]').forEach(x=>{ x.dataset.armed='0'; x.textContent='Delete'; x.classList.remove('armed'); });
+        b.dataset.armed = '1';
+        b.textContent = 'Tap to confirm';
+        b.classList.add('armed');
+        setTimeout(()=>{ if(b.dataset.armed==='1'){ b.dataset.armed='0'; b.textContent='Delete'; b.classList.remove('armed'); } }, 4000);
+        return;
+      }
+      const keep = liveJobs.filter(x=>x.id !== b.dataset.del);
+      const out = await API.call('jobs', {jobs: keep});
+      if(out && out.ok) loadLive();
+      else note('bad','Could not reach the server.');
+    });
+  });
+}
+
+/* ================= boot ================= */
+drawJob();
+loadDash();
+refreshBadges();
+setInterval(refreshBadges, 45000);
+</script>
+</body>
+</html>
