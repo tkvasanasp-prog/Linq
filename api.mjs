@@ -63,66 +63,25 @@ async function event(req, store) {
   // Real people, not page loads: every device keeps one row, written only on
   // the "visit" event.  first = the day we first saw it, last = the latest day.
   const uid = str(body.uid).slice(0, 60);
-  if (uid && name === "visit") {
-    const devices = await readJSON(store, "devices", {});
-    const row = devices[uid];
-    if (!row || row.last !== day) {
-      if (!row) devices[uid] = { first: day, last: day };
-      else row.last = day;
-      const keys = Object.keys(devices);
-      if (keys.length > 20000) {
-        keys.sort((a, b) => (devices[a].last < devices[b].last ? -1 : 1));
-        for (const k of keys.slice(0, keys.length - 20000)) delete devices[k];
-      }
-      await store.setJSON("devices", devices);
-    }
-  }
+  if (uid && name === "visit") await remember(store, "devices", uid, day);
 
   // Every box on the dashboard counts PEOPLE, not taps: each event keeps a
   // list of the devices that did it, with the first and last day seen.
-  if (uid) {
-    const euids = await readJSON(store, "euids", {});
-    const map = euids[name] || (euids[name] = {});
-    const row = map[uid];
-    if (!row) map[uid] = [day, day];
-    else row[1] = day;
-    const ids = Object.keys(map);
-    if (ids.length > 20000) {
-      ids.sort((a, b) => (map[a][1] < map[b][1] ? -1 : 1));
-      for (const k of ids.slice(0, ids.length - 20000)) delete map[k];
-    }
-    await store.setJSON("euids", euids);
-  }
+  // Each event gets its OWN store key.  A visitor fires several events at
+  // once when the page opens; if they all wrote one shared file, the last
+  // write would wipe the others and the boxes would disagree.
+  if (uid) await remember(store, "eu_" + name, uid, day);
 
   // per-job view counts for the panel's "Uploaded jobs" list
-  if (name === "job_view") {
-    const job = str(body.job).slice(0, 60);
-    if (job) {
-      const views = await readJSON(store, "jobviews", {});
-      views[job] = (views[job] || 0) + 1;
-      await store.setJSON("jobviews", views);
-    }
+  if (name === "job_view" && uid) {
+    const job = str(body.job).slice(0, 60).replace(/[^A-Za-z0-9_-]/g, "");
+    if (job) await remember(store, "jv_" + job, uid, day);
   }
 
-  const data = await readJSON(store, "counters", {});
-  const row = data[name] || { total: 0, days: {} };
-  row.total = (row.total || 0) + 1;
-  row.days[day] = (row.days[day] || 0) + 1;
-
-  const keys = Object.keys(row.days).sort();
-  if (keys.length > 120) {
-    const trimmed = {};
-    for (const k of keys.slice(-120)) trimmed[k] = row.days[k];
-    row.days = trimmed;
-  }
-  data[name] = row;
-
-  await store.setJSON("counters", data);
   return json({ ok: true });
 }
 
 async function stats(store) {
-  const euids = await readJSON(store, "euids", {});
   const day = today();
   const within = (d, n) => {
     if (!d) return false;
@@ -130,8 +89,9 @@ async function stats(store) {
     return !isNaN(ms) && Date.now() - ms < n * 86400000;
   };
   const out = {};
-  for (const name of EVENTS) {
-    const map = euids[name] || {};
+  const maps = await Promise.all(EVENTS.map(n => readJSON(store, "eu_" + n, {})));
+  EVENTS.forEach((name, i) => {
+    const map = maps[i];
     const box = { today: 0, week: 0, month: 0, total: 0 };
     for (const id of Object.keys(map)) {
       const last = map[id][1];
@@ -141,45 +101,61 @@ async function stats(store) {
       if (within(last, 30)) box.month++;
     }
     out[name] = box;
-  }
+  });
   // New / returning users are counted per device, not per page load.
   const devices = await readJSON(store, "devices", {});
   const fresh = { today: 0, week: 0, month: 0, total: 0 };
   const back = { today: 0, week: 0, month: 0, total: 0 };
-  for (const uid of Object.keys(devices)) {
-    const r = devices[uid] || {};
+  for (const id of Object.keys(devices)) {
+    const r = devices[id] || [];
+    const first = r[0], last = r[1];
     fresh.total++;
-    if (r.first === day) fresh.today++;
-    if (within(r.first, 7)) fresh.week++;
-    if (within(r.first, 30)) fresh.month++;
-    if (r.last && r.first && r.last !== r.first) {
+    if (first === day) fresh.today++;
+    if (within(first, 7)) fresh.week++;
+    if (within(first, 30)) fresh.month++;
+    if (first && last && last !== first) {
       back.total++;
-      if (r.last === day) back.today++;
-      if (within(r.last, 7)) back.week++;
-      if (within(r.last, 30)) back.month++;
+      if (last === day) back.today++;
+      if (within(last, 7)) back.week++;
+      if (within(last, 30)) back.month++;
     }
   }
   if (fresh.total) { out.user_new = fresh; out.user_old = back; }
 
-  const views = await readJSON(store, "jobviews", {});
-
-  return json({ ok: true, stats: out, jobviews: views });
+  return json({ ok: true, stats: out });
 }
 
-function window(days, n) {
-  let sum = 0;
-  const now = new Date();
-  for (let i = 0; i < n; i++) {
-    const d = new Date(now.getTime() - i * 86400000);
-    sum += days[stamp(d)] || 0;
+/* Add one device to an event's list.
+   Two visitors can hit the same list in the same instant, and the second
+   write would otherwise erase the first.  So after writing we read back and
+   check we are really in there; if not, we try again. */
+async function remember(store, key, uid, day) {
+  for (let attempt = 0; attempt < 6; attempt++) {
+    const map = await readJSON(store, key, {});
+    if (map[uid] && map[uid][1] === day) return;      // already recorded
+    map[uid] = [map[uid] ? map[uid][0] : day, day];
+    const ids = Object.keys(map);
+    if (ids.length > 20000) {
+      ids.sort((a, b) => (map[a][1] < map[b][1] ? -1 : 1));
+      for (const k of ids.slice(0, ids.length - 20000)) delete map[k];
+    }
+    await store.setJSON(key, map);
+    await new Promise(r => setTimeout(r, 25 + Math.floor(Math.random() * 120)));
   }
-  return sum;
 }
 
 /* ---------------- reset the dashboard counts ---------------- */
 
 async function reset(store) {
-  for (const key of ["counters", "devices", "euids", "jobviews"]) {
+  let jobIds = [];
+  try {
+    const saved = await readJSON(store, "jobs", { jobs: [] });
+    jobIds = (saved.jobs || []).map(j => "jv_" + String(j.id || "").replace(/[^A-Za-z0-9_-]/g, ""));
+  } catch { /* no jobs yet */ }
+  const keys = ["counters", "devices", "euids", "jobviews"]
+    .concat(EVENTS.map(n => "eu_" + n))
+    .concat(jobIds);
+  for (const key of keys) {
     try { await store.setJSON(key, {}); } catch { /* nothing there */ }
   }
   return json({ ok: true });
@@ -196,8 +172,12 @@ async function jobs(req, store) {
     return json({ ok: true, count: list.length });
   }
   const saved = await readJSON(store, "jobs", { jobs: [] });
-  const views = await readJSON(store, "jobviews", {});
-  return json({ ok: true, jobs: saved.jobs || [], views });
+  const list = saved.jobs || [];
+  const ids = list.map(j => String(j.id || "").replace(/[^A-Za-z0-9_-]/g, ""));
+  const maps = await Promise.all(ids.map(id => id ? readJSON(store, "jv_" + id, {}) : {}));
+  const views = {};
+  ids.forEach((id, i) => { if (id) views[id] = Object.keys(maps[i]).length; });
+  return json({ ok: true, jobs: list, views });
 }
 
 /* ---------------- leads ---------------- */
