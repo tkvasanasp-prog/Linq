@@ -29,6 +29,7 @@ export default async (req) => {
     if (kind === "leads") return await leads(req, store);
     if (kind === "users") return await users(req, store);
     if (kind === "domains") return await domains(req, store);
+    if (kind === "reset" && req.method === "POST") return await reset(store);
   } catch (err) {
     return json({ ok: false, error: String(err) }, 500);
   }
@@ -77,6 +78,22 @@ async function event(req, store) {
     }
   }
 
+  // Every box on the dashboard counts PEOPLE, not taps: each event keeps a
+  // list of the devices that did it, with the first and last day seen.
+  if (uid) {
+    const euids = await readJSON(store, "euids", {});
+    const map = euids[name] || (euids[name] = {});
+    const row = map[uid];
+    if (!row) map[uid] = [day, day];
+    else row[1] = day;
+    const ids = Object.keys(map);
+    if (ids.length > 20000) {
+      ids.sort((a, b) => (map[a][1] < map[b][1] ? -1 : 1));
+      for (const k of ids.slice(0, ids.length - 20000)) delete map[k];
+    }
+    await store.setJSON("euids", euids);
+  }
+
   // per-job view counts for the panel's "Uploaded jobs" list
   if (name === "job_view") {
     const job = str(body.job).slice(0, 60);
@@ -105,27 +122,30 @@ async function event(req, store) {
 }
 
 async function stats(store) {
-  const data = await readJSON(store, "counters", {});
-  const out = {};
-  for (const name of EVENTS) {
-    const row = data[name] || { total: 0, days: {} };
-    out[name] = {
-      today: row.days[today()] || 0,
-      week: window(row.days, 7),
-      month: window(row.days, 30),
-      total: row.total || 0
-    };
-  }
-  // New / returning users are counted per device, not per page load.
-  const devices = await readJSON(store, "devices", {});
+  const euids = await readJSON(store, "euids", {});
   const day = today();
-  const fresh = { today: 0, week: 0, month: 0, total: 0 };
-  const back = { today: 0, week: 0, month: 0, total: 0 };
   const within = (d, n) => {
     if (!d) return false;
     const ms = Date.parse(d + "T00:00:00Z");
     return !isNaN(ms) && Date.now() - ms < n * 86400000;
   };
+  const out = {};
+  for (const name of EVENTS) {
+    const map = euids[name] || {};
+    const box = { today: 0, week: 0, month: 0, total: 0 };
+    for (const id of Object.keys(map)) {
+      const last = map[id][1];
+      box.total++;
+      if (last === day) box.today++;
+      if (within(last, 7)) box.week++;
+      if (within(last, 30)) box.month++;
+    }
+    out[name] = box;
+  }
+  // New / returning users are counted per device, not per page load.
+  const devices = await readJSON(store, "devices", {});
+  const fresh = { today: 0, week: 0, month: 0, total: 0 };
+  const back = { today: 0, week: 0, month: 0, total: 0 };
   for (const uid of Object.keys(devices)) {
     const r = devices[uid] || {};
     fresh.total++;
@@ -154,6 +174,15 @@ function window(days, n) {
     sum += days[stamp(d)] || 0;
   }
   return sum;
+}
+
+/* ---------------- reset the dashboard counts ---------------- */
+
+async function reset(store) {
+  for (const key of ["counters", "devices", "euids", "jobviews"]) {
+    try { await store.setJSON(key, {}); } catch { /* nothing there */ }
+  }
+  return json({ ok: true });
 }
 
 /* ---------------- jobs ---------------- */

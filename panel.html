@@ -210,6 +210,18 @@ nav .ic{position:relative;display:block}
 .live-b{flex:1;min-width:0}
 .live-r{display:block;color:var(--paper);font:700 12.6px system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif}
 .live-s{display:block;color:var(--dim);font:400 10.6px system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;margin-top:1px}
+.dash-n{
+  color:var(--dim);margin-top:12px;
+  font:400 10.8px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+}
+.dash-n b{color:var(--paper);font-weight:700}
+.dash-reset{
+  margin-top:10px;width:100%;cursor:pointer;
+  background:#fff;border:1px solid var(--line);border-radius:999px;
+  padding:10px 14px;color:var(--dim);
+  font:600 11.4px system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+}
+.dash-reset.armed{background:var(--red);border-color:var(--red);color:#fff}
 .live-v{
   display:inline-block;margin-top:4px;padding:2px 7px;border-radius:99px;
   background:rgba(10,107,255,.12);color:#0A6BFF;
@@ -323,6 +335,9 @@ nav .ic{position:relative;display:block}
           <div class="stat ok"><b id="sYes">0</b><span>Said YES to the training ad</span></div>
           <div class="stat red"><b id="sNo">0</b><span>Said NO to the training ad</span></div>
         </div>
+        <p class="dash-n">Every number above counts <b>people</b>, not taps. The same phone
+          doing the same thing again does not add to the count.</p>
+        <button type="button" class="dash-reset" id="dashReset">Reset all counts to zero</button>
       </div>
     </section>
 
@@ -538,6 +553,30 @@ function quad(el, s){
     '<div><b>'+s.week+'</b><span>Week</span></div>'+
     '<div><b>'+s.month+'</b><span>Month</span></div>'+
     '<div><b>'+s.total+'</b><span>Total</span></div>';
+}
+
+const dashReset = document.getElementById('dashReset');
+if(dashReset){
+  dashReset.addEventListener('click', async ()=>{
+    if(dashReset.dataset.armed !== '1'){
+      dashReset.dataset.armed='1';
+      dashReset.textContent='Tap again to erase all counts';
+      dashReset.classList.add('armed');
+      setTimeout(()=>{ if(dashReset.dataset.armed==='1'){
+        dashReset.dataset.armed='0';
+        dashReset.textContent='Reset all counts to zero';
+        dashReset.classList.remove('armed');
+      }},4000);
+      return;
+    }
+    dashReset.dataset.armed='0';
+    dashReset.classList.remove('armed');
+    dashReset.textContent='Resetting...';
+    const out = await API.call('reset', {});
+    dashReset.textContent='Reset all counts to zero';
+    if(out && out.ok){ note('ok','Counts cleared.'); loadDash(); }
+    else note('bad','Could not reach the server.');
+  });
 }
 
 async function loadDash(){

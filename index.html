@@ -298,6 +298,10 @@ body.formopen .news{opacity:.35}
 .pp-soon{opacity:.62;filter:grayscale(.3);border-top-color:#9FB4CE}
 .pp-soon .pp-num{background:#9FB4CE}
 .pp-soon .pp-apply{background:#9FB4CE;box-shadow:none;cursor:default}
+.pp-apply.pp-sent{
+  background:var(--panel-2);color:var(--spark-lit);
+  box-shadow:none;cursor:default;
+}
 .pp-badge{
   display:inline-block;margin-top:6px;
   background:var(--panel-2);color:var(--dim);border-radius:999px;
@@ -1182,13 +1186,17 @@ button#next.pagebtn:disabled{
 
 /* ---- opening splash: JobsLink + Interview Questions -> LinQ ---- */
 .splash{
-  position:absolute;inset:0;z-index:999;
+  position:fixed;inset:0;z-index:5000;
   background:#fff;
   display:flex;flex-direction:column;align-items:center;justify-content:center;gap:26px;
   padding:0 14px;
   transition:opacity .55s ease;
 }
 .splash.gone{opacity:0;pointer-events:none}
+body.splashing .tabbar,
+body.splashing .ticker,
+body.splashing header,
+body.splashing .jside{visibility:hidden}
 .sp-line{
   display:flex;align-items:center;justify-content:center;flex-wrap:nowrap;
   font-family:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;font-weight:700;line-height:1;
@@ -3676,8 +3684,40 @@ window.LQ=(function(){
   document.getElementById('offGo').addEventListener('click',()=>showTraining());
 
   let tfProgram='Job Training page';
+
+  /* an applied program shows "Submitted" and cannot be applied to again
+     for one month; after that the button goes back to "Apply". */
+  const MONTH=30*86400000;
+  function applied(){
+    try{ return JSON.parse(localStorage.getItem('lq_applied')||'{}'); }catch(e){ return {}; }
+  }
+  function markApplied(name){
+    try{
+      const a=applied();a[name]=Date.now();
+      localStorage.setItem('lq_applied',JSON.stringify(a));
+    }catch(e){}
+  }
+  function paintApply(){
+    const a=applied();
+    Array.prototype.forEach.call(document.querySelectorAll('.pp-apply[data-program]'),b=>{
+      const name=b.getAttribute('data-program');
+      const when=a[name];
+      if(when && Date.now()-when < MONTH){
+        b.textContent='Submitted';
+        b.disabled=true;
+        b.classList.add('pp-sent');
+      }else{
+        b.textContent='Apply';
+        b.disabled=false;
+        b.classList.remove('pp-sent');
+      }
+    });
+  }
+  paintApply();
+
   Array.prototype.forEach.call(document.querySelectorAll('.pp-apply'),b=>{
     b.addEventListener('click',()=>{
+      if(b.disabled)return;
       tfProgram=b.getAttribute('data-program')||'Job Training page';
       const t=document.getElementById('tfTitle');
       if(t)t.textContent='Apply : '+tfProgram;
@@ -3723,7 +3763,17 @@ window.LQ=(function(){
       saved.push(lead);localStorage.setItem('pf_leads',JSON.stringify(saved));
     }catch(e){}
 
+    // "Trainer will contact you" shows on the page, then clears back to the
+    // programs with this one marked Submitted
+    markApplied(tfProgram);
     form.hidden=true;done.hidden=false;
+    setTimeout(()=>{
+      done.hidden=true;
+      intro.hidden=false;
+      paintApply();
+      form.reset();
+      try{window.scrollTo({top:0,behavior:'auto'});}catch(e){window.scrollTo(0,0);}
+    },2600);
   });
 })();
 
@@ -4161,8 +4211,12 @@ window.LQ=(function(){
 (function(){
   const sp=document.getElementById('splash');
   if(!sp)return;
+  document.body.classList.add('splashing');
   setTimeout(()=>sp.classList.add('merge'),900);
-  setTimeout(()=>sp.classList.add('gone'),2950);
+  setTimeout(()=>{
+    sp.classList.add('gone');
+    document.body.classList.remove('splashing');
+  },2950);
   setTimeout(()=>{sp.remove();},3550);
 })();
 </script>
