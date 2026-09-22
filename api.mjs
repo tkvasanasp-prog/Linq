@@ -40,7 +40,7 @@ export default async (req) => {
 const EVENTS = [
   "visit", "share", "user_new", "user_old",
   "jobs_done", "job_questions", "qa_page", "qa_next",
-  "profile", "lead_yes", "lead_no"
+  "profile", "lead_yes", "lead_no", "job_view"
 ];
 
 async function readJSON(store, key, fallback) {
@@ -57,8 +57,37 @@ async function event(req, store) {
   const name = String(body.name || "").slice(0, 40);
   if (EVENTS.indexOf(name) === -1) return json({ ok: false, error: "unknown event" }, 400);
 
-  const data = await readJSON(store, "counters", {});
   const day = today();
+
+  // Real people, not page loads: every device keeps one row, written only on
+  // the "visit" event.  first = the day we first saw it, last = the latest day.
+  const uid = str(body.uid).slice(0, 60);
+  if (uid && name === "visit") {
+    const devices = await readJSON(store, "devices", {});
+    const row = devices[uid];
+    if (!row || row.last !== day) {
+      if (!row) devices[uid] = { first: day, last: day };
+      else row.last = day;
+      const keys = Object.keys(devices);
+      if (keys.length > 20000) {
+        keys.sort((a, b) => (devices[a].last < devices[b].last ? -1 : 1));
+        for (const k of keys.slice(0, keys.length - 20000)) delete devices[k];
+      }
+      await store.setJSON("devices", devices);
+    }
+  }
+
+  // per-job view counts for the panel's "Uploaded jobs" list
+  if (name === "job_view") {
+    const job = str(body.job).slice(0, 60);
+    if (job) {
+      const views = await readJSON(store, "jobviews", {});
+      views[job] = (views[job] || 0) + 1;
+      await store.setJSON("jobviews", views);
+    }
+  }
+
+  const data = await readJSON(store, "counters", {});
   const row = data[name] || { total: 0, days: {} };
   row.total = (row.total || 0) + 1;
   row.days[day] = (row.days[day] || 0) + 1;
@@ -87,7 +116,34 @@ async function stats(store) {
       total: row.total || 0
     };
   }
-  return json({ ok: true, stats: out });
+  // New / returning users are counted per device, not per page load.
+  const devices = await readJSON(store, "devices", {});
+  const day = today();
+  const fresh = { today: 0, week: 0, month: 0, total: 0 };
+  const back = { today: 0, week: 0, month: 0, total: 0 };
+  const within = (d, n) => {
+    if (!d) return false;
+    const ms = Date.parse(d + "T00:00:00Z");
+    return !isNaN(ms) && Date.now() - ms < n * 86400000;
+  };
+  for (const uid of Object.keys(devices)) {
+    const r = devices[uid] || {};
+    fresh.total++;
+    if (r.first === day) fresh.today++;
+    if (within(r.first, 7)) fresh.week++;
+    if (within(r.first, 30)) fresh.month++;
+    if (r.last && r.first && r.last !== r.first) {
+      back.total++;
+      if (r.last === day) back.today++;
+      if (within(r.last, 7)) back.week++;
+      if (within(r.last, 30)) back.month++;
+    }
+  }
+  if (fresh.total) { out.user_new = fresh; out.user_old = back; }
+
+  const views = await readJSON(store, "jobviews", {});
+
+  return json({ ok: true, stats: out, jobviews: views });
 }
 
 function window(days, n) {
@@ -111,7 +167,8 @@ async function jobs(req, store) {
     return json({ ok: true, count: list.length });
   }
   const saved = await readJSON(store, "jobs", { jobs: [] });
-  return json({ ok: true, jobs: saved.jobs || [] });
+  const views = await readJSON(store, "jobviews", {});
+  return json({ ok: true, jobs: saved.jobs || [], views });
 }
 
 /* ---------------- leads ---------------- */
