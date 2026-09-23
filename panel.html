@@ -435,7 +435,7 @@ nav .ic{position:relative;display:block}
         <label class="f"><span>Apply link <i class="req">*</i> ( opens when a user taps Apply )</span><input id="jLink" type="url" placeholder="https://..."></label>
 
         <div class="sec-h" style="margin-top:16px">Job details <span class="opt">( optional )</span></div>
-        <p class="hint">Fill what you need, up to 20 points. Tap "Add point" for the next one.</p>
+        <p class="hint">Points are optional. Fill this one if you want, and tap "Add point" for another — up to 20.</p>
         <div id="jPoints"></div>
         <button type="button" class="btn ghost wide" id="jAddPt">+ Add point</button>
 
@@ -882,6 +882,15 @@ const BLANK = () => ({
 });
 
 let drafts = local.get('linq_drafts', [BLANK()]);
+// older drafts were saved with six empty boxes — clear those out
+drafts.forEach(d=>{
+  if(!Array.isArray(d.points)) { d.points = [{k:'',v:''}]; return; }
+  while(d.points.length > 1){
+    const last = d.points[d.points.length-1];
+    if((last.k||'').trim() || (last.v||'').trim()) break;
+    d.points.pop();
+  }
+});
 let at = 0, qTab = 'rep', jobSeg = 'new', liveJobs = [];
 if(!drafts.length) drafts = [BLANK()];
 if(!drafts[0].points) drafts = [BLANK()];
@@ -910,9 +919,7 @@ function drawPoints(){
   if(!j.points.length) j.points = [{k:'',v:''}];
   document.getElementById('jPoints').innerHTML = j.points.map((p,i)=>
     '<div class="pt">'+
-      '<div class="pt-h"><span class="pt-n">POINT '+(i+1)+'</span>'+
-        (i ? '<button type="button" class="pt-x" data-rm="'+i+'">Remove</button>' : '')+
-      '</div>'+
+      '<div class="pt-h"><span class="pt-n">POINT '+(i+1)+'</span></div>'+
       '<label class="f"><span>Title</span><input data-p="'+i+'" data-f="k" type="text" value="'+esc(p.k)+'" placeholder="e.g. Location"></label>'+
       '<label class="f"><span>Content</span><input data-p="'+i+'" data-f="v" type="text" value="'+esc(p.v)+'" placeholder="e.g. Chennai"></label>'+
     '</div>').join('');
@@ -920,12 +927,6 @@ function drawPoints(){
     inp.addEventListener('input',()=>{
       drafts[at].points[+inp.dataset.p][inp.dataset.f] = inp.value;
       saveDrafts();
-    });
-  });
-  document.querySelectorAll('#jPoints [data-rm]').forEach(b=>{
-    b.addEventListener('click',()=>{
-      drafts[at].points.splice(+b.dataset.rm,1);
-      drawPoints(); saveDrafts();
     });
   });
   const add = document.getElementById('jAddPt');
@@ -946,8 +947,19 @@ if(addPt) addPt.addEventListener('click',()=>{
   if(last){ last.scrollIntoView({behavior:'smooth',block:'center'}); const i=last.querySelector('input'); if(i)i.focus(); }
 });
 
+// an empty box at the end is not kept — the admin adds one when they want it
+function trimPoints(j){
+  if(!Array.isArray(j.points) || !j.points.length){ j.points = [{k:'',v:''}]; return; }
+  while(j.points.length > 1){
+    const last = j.points[j.points.length-1];
+    if((last.k||'').trim() || (last.v||'').trim()) break;
+    j.points.pop();
+  }
+}
+
 function drawJob(){
   const j = drafts[at];
+  trimPoints(j);
   document.getElementById('jCount').textContent = 'Job ' + (at+1) + ' of ' + drafts.length;
   document.getElementById('jRole').value = j.role;
   document.getElementById('jLink').value = j.link;
