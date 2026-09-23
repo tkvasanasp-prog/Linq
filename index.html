@@ -3528,16 +3528,34 @@ window.LQ=(function(){
     }
     return null;
   }
-  function uid(){
+  // The phone's id is kept in two places — storage and a one-year cookie.
+  // If either survives, the same phone keeps the same id, so clearing site
+  // data or a storage hiccup does not turn one person into two.
+  function readCookie(){
     try{
-      let v=localStorage.getItem('lq_uid');
-      if(!v){
-        v='u'+Date.now().toString(36)+Math.random().toString(36).slice(2,7);
-        localStorage.setItem('lq_uid',v);
-      }
-      return v;
+      const m=document.cookie.match(/(?:^|;\s*)lq_uid=([^;]+)/);
+      return m?decodeURIComponent(m[1]):'';
     }catch(e){ return ''; }
   }
+  function writeCookie(v){
+    try{
+      document.cookie='lq_uid='+encodeURIComponent(v)+
+        ';path=/;max-age=31536000;SameSite=Lax';
+    }catch(e){}
+  }
+  let myUid=null;
+  function uid(){
+    if(myUid)return myUid;
+    let v='';
+    try{ v=localStorage.getItem('lq_uid')||''; }catch(e){}
+    if(!v) v=readCookie();
+    if(!v) v='u'+Date.now().toString(36)+Math.random().toString(36).slice(2,7);
+    try{ localStorage.setItem('lq_uid',v); }catch(e){}
+    writeCookie(v);
+    myUid=v;
+    return v;
+  }
+  window.__lqUid=uid;
   // every tap carries its own id so the server can count it exactly once
   function tapId(){ return Date.now().toString(36)+Math.random().toString(36).slice(2,8); }
   function ev(name){ post('event',{name:name,uid:uid(),tap:tapId()}); }
