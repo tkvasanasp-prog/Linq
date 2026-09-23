@@ -104,6 +104,20 @@ nav .ic{position:relative;display:block}
 .quad b{display:block;color:var(--paper);font:700 15px system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif}
 .quad span{display:block;color:var(--dim);font:500 8.8px system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;letter-spacing:.04em;text-transform:uppercase;margin-top:1px}
 
+.trio{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}
+.trio div{background:var(--panel);border-radius:9px;padding:8px 4px;text-align:center}
+.trio b{display:block;color:var(--paper);font:800 18px system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif}
+.trio span{display:block;color:var(--dim);font:500 8.8px system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;letter-spacing:.04em;text-transform:uppercase;margin-top:1px}
+.trio.ok b{color:var(--ok)}
+.trio.red b{color:var(--red)}
+.card-t i{
+  font-style:normal;display:inline-block;margin-left:5px;vertical-align:1px;
+  border-radius:999px;padding:2px 7px;
+  font:700 8.6px system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  letter-spacing:.05em;text-transform:uppercase;
+}
+.card-t .tagp{background:var(--panel-2);color:var(--spark-lit)}
+.card-t .tagc{background:#FFF0D6;color:#8A5B00}
 .pair{display:grid;grid-template-columns:1fr 1fr;gap:9px}
 .stat{
   background:#fff;border:1px solid var(--line);border-radius:13px;
@@ -222,6 +236,13 @@ nav .ic{position:relative;display:block}
   font:600 11.4px system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
 }
 .dash-reset.armed{background:var(--red);border-color:var(--red);color:#fff}
+.pt-h{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.pt-x{
+  flex:none;cursor:pointer;border:0;border-radius:8px;
+  background:#FDE8EB;color:#9C0A1C;padding:4px 10px;
+  font:700 10px system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+}
+#jAddPt[disabled]{opacity:.5;cursor:default}
 .live-v{
   display:inline-block;margin-top:4px;padding:2px 7px;border-radius:99px;
   background:rgba(10,107,255,.12);color:#0A6BFF;
@@ -307,36 +328,67 @@ nav .ic{position:relative;display:block}
       <div class="sec">
         <div class="sec-h">Shares</div>
         <div class="card">
-          <p class="card-t">Times the website was shared</p>
-          <div class="quad" id="qShare"></div>
+          <p class="card-t">Times the website was shared — every share counts,
+            the same person sharing twice counts twice</p>
+          <div class="trio" id="qShare"></div>
         </div>
       </div>
 
       <div class="sec">
         <div class="sec-h">Visitors</div>
         <div class="card">
-          <p class="card-t">People who opened the website</p>
-          <div class="quad" id="qVisit"></div>
+          <p class="card-t">People who opened the website — one phone opening it
+            ten times is still one visitor</p>
+          <div class="trio" id="qVisit"></div>
         </div>
-        <div class="pair">
-          <div class="stat"><b id="sNew">0</b><span>New users</span></div>
-          <div class="stat"><b id="sOld">0</b><span>Returning users</span></div>
+        <div class="card">
+          <p class="card-t">New users — here for the very first time</p>
+          <div class="trio" id="qNew"></div>
+        </div>
+        <div class="card">
+          <p class="card-t">Returning users — came back on a later day</p>
+          <div class="trio" id="qOld"></div>
         </div>
       </div>
 
       <div class="sec">
         <div class="sec-h">What users do</div>
-        <div class="pair">
-          <div class="stat"><b id="sDone">0</b><span>Finished all jobs, waiting for new uploads</span></div>
-          <div class="stat"><b id="sJobQ">0</b><span>Opened a job's own interview questions</span></div>
-          <div class="stat"><b id="sQaPage">0</b><span>Opened the Interview Q&amp;A page</span></div>
-          <div class="stat"><b id="sQaNext">0</b><span>Moved through questions with Next</span></div>
-          <div class="stat"><b id="sProfile">0</b><span>Created a profile</span></div>
-          <div class="stat ok"><b id="sYes">0</b><span>Said YES to the training ad</span></div>
-          <div class="stat red"><b id="sNo">0</b><span>Said NO to the training ad</span></div>
+
+        <div class="card">
+          <p class="card-t">Finished all jobs, waiting for new uploads
+            <i class="tagp">people</i></p>
+          <div class="trio" id="qDone"></div>
         </div>
-        <p class="dash-n">Every number above counts <b>people</b>, not taps. The same phone
-          doing the same thing again does not add to the count.</p>
+        <div class="card">
+          <p class="card-t">Opened a job's own interview questions
+            <i class="tagc">taps</i></p>
+          <div class="trio" id="qJobQ"></div>
+        </div>
+        <div class="card">
+          <p class="card-t">Opened the Interview Q&amp;A page
+            <i class="tagc">taps</i></p>
+          <div class="trio" id="qQaPage"></div>
+        </div>
+        <div class="card">
+          <p class="card-t">Moved on with Next — job pages and questions
+            <i class="tagc">taps</i></p>
+          <div class="trio" id="qQaNext"></div>
+        </div>
+        <div class="card">
+          <p class="card-t">Created a profile <i class="tagp">people</i></p>
+          <div class="trio" id="qProfile"></div>
+        </div>
+        <div class="card">
+          <p class="card-t">Said YES to the training ad <i class="tagc">taps</i></p>
+          <div class="trio ok" id="qYes"></div>
+        </div>
+        <div class="card">
+          <p class="card-t">Said NO to the training ad <i class="tagc">taps</i></p>
+          <div class="trio red" id="qNo"></div>
+        </div>
+
+        <p class="dash-n"><b>people</b> = the same phone doing it again does not add.
+          <b>taps</b> = every single tap is counted.</p>
         <button type="button" class="dash-reset" id="dashReset">Reset all counts to zero</button>
       </div>
     </section>
@@ -380,14 +432,12 @@ nav .ic{position:relative;display:block}
 
         <label class="f"><span>Role <i class="req">*</i></span><input id="jRole" type="text" placeholder="e.g. Data Analyst Trainee"></label>
 
-        <label class="f"><span>Last date <i class="req">*</i></span><input id="jLast" type="date"></label>
-        <label class="check"><input type="checkbox" id="jNoDate"><span>Not mentioned &nbsp;<i>— the job then closes one month after publishing</i></span></label>
-
         <label class="f"><span>Apply link <i class="req">*</i> ( opens when a user taps Apply )</span><input id="jLink" type="url" placeholder="https://..."></label>
 
-        <div class="sec-h" style="margin-top:16px">Job details — 10 points <span class="opt">( optional )</span></div>
-        <p class="hint">Last date is always shown as the first point. Fill only the points you need — empty boxes are skipped.</p>
+        <div class="sec-h" style="margin-top:16px">Job details <span class="opt">( optional )</span></div>
+        <p class="hint">Fill what you need, up to 20 points. Tap "Add point" for the next one.</p>
         <div id="jPoints"></div>
+        <button type="button" class="btn ghost wide" id="jAddPt">+ Add point</button>
 
         <div class="sec-h" style="margin-top:16px">Interview questions <span class="opt">( optional )</span></div>
         <p class="hint">If you skip this, the blue INTERVIEW QUESTIONS button will not appear on that job.</p>
@@ -583,18 +633,25 @@ async function loadDash(){
   const res = await API.call('stats');
   const s = (res && res.stats) || {};
   const g = k => s[k] || zero;
-  quad(document.getElementById('qShare'), g('share'));
-  quad(document.getElementById('qVisit'), g('visit'));
-  const put = (id,v)=>{ document.getElementById(id).textContent = v; };
-  put('sNew', g('user_new').total);
-  put('sOld', g('user_old').total);
-  put('sDone', g('jobs_done').total);
-  put('sJobQ', g('job_questions').total);
-  put('sQaPage', g('qa_page').total);
-  put('sQaNext', g('qa_next').total);
-  put('sProfile', g('profile').total);
-  put('sYes', g('lead_yes').total);
-  put('sNo', g('lead_no').total);
+  const trio = (id, v) => {
+    const el = document.getElementById(id);
+    if(!el) return;
+    el.innerHTML =
+      '<div><b>'+v.today+'</b><span>Today</span></div>'+
+      '<div><b>'+v.week+'</b><span>This week</span></div>'+
+      '<div><b>'+v.month+'</b><span>This month</span></div>';
+  };
+  trio('qShare',   g('share'));
+  trio('qVisit',   g('visit'));
+  trio('qNew',     g('user_new'));
+  trio('qOld',     g('user_old'));
+  trio('qDone',    g('jobs_done'));
+  trio('qJobQ',    g('job_questions'));
+  trio('qQaPage',  g('qa_page'));
+  trio('qQaNext',  g('qa_next'));
+  trio('qProfile', g('profile'));
+  trio('qYes',     g('lead_yes'));
+  trio('qNo',      g('lead_no'));
 }
 
 /* ================= unread badges ================= */
@@ -819,9 +876,8 @@ function download(name, text, type){
 
 /* ================= upload jobs ================= */
 const BLANK = () => ({
-  role:'', last:'', noDate:false, link:'', logo:'',
-  points:[{k:'',v:''},{k:'',v:''},{k:'',v:''},{k:'',v:''},{k:'',v:''},
-          {k:'',v:''},{k:'',v:''},{k:'',v:''},{k:'',v:''},{k:'',v:''}],
+  role:'', link:'', logo:'',
+  points:[{k:'',v:''}],
   qs:{rep:[],bas:[],exp:[]}
 });
 
@@ -847,11 +903,16 @@ function saveDrafts(){
     'Draft saved on this device · ' + drafts.length + ' job' + (drafts.length===1?'':'s') + ' waiting to publish.';
 }
 
+const MAX_POINTS = 20;
+
 function drawPoints(){
   const j = drafts[at];
+  if(!j.points.length) j.points = [{k:'',v:''}];
   document.getElementById('jPoints').innerHTML = j.points.map((p,i)=>
     '<div class="pt">'+
-      '<div class="pt-h"><span class="pt-n">POINT '+(i+1)+'</span></div>'+
+      '<div class="pt-h"><span class="pt-n">POINT '+(i+1)+'</span>'+
+        (i ? '<button type="button" class="pt-x" data-rm="'+i+'">Remove</button>' : '')+
+      '</div>'+
       '<label class="f"><span>Title</span><input data-p="'+i+'" data-f="k" type="text" value="'+esc(p.k)+'" placeholder="e.g. Location"></label>'+
       '<label class="f"><span>Content</span><input data-p="'+i+'" data-f="v" type="text" value="'+esc(p.v)+'" placeholder="e.g. Chennai"></label>'+
     '</div>').join('');
@@ -861,15 +922,34 @@ function drawPoints(){
       saveDrafts();
     });
   });
+  document.querySelectorAll('#jPoints [data-rm]').forEach(b=>{
+    b.addEventListener('click',()=>{
+      drafts[at].points.splice(+b.dataset.rm,1);
+      drawPoints(); saveDrafts();
+    });
+  });
+  const add = document.getElementById('jAddPt');
+  if(add){
+    const full = j.points.length >= MAX_POINTS;
+    add.disabled = full;
+    add.textContent = full ? 'All 20 points added' : '+ Add point';
+  }
 }
+
+const addPt = document.getElementById('jAddPt');
+if(addPt) addPt.addEventListener('click',()=>{
+  if(drafts[at].points.length >= MAX_POINTS) return;
+  drafts[at].points.push({k:'',v:''});
+  drawPoints(); saveDrafts();
+  const boxes = document.querySelectorAll('#jPoints .pt');
+  const last = boxes[boxes.length-1];
+  if(last){ last.scrollIntoView({behavior:'smooth',block:'center'}); const i=last.querySelector('input'); if(i)i.focus(); }
+});
 
 function drawJob(){
   const j = drafts[at];
   document.getElementById('jCount').textContent = 'Job ' + (at+1) + ' of ' + drafts.length;
   document.getElementById('jRole').value = j.role;
-  document.getElementById('jLast').value = j.last;
-  document.getElementById('jLast').disabled = !!j.noDate;
-  document.getElementById('jNoDate').checked = !!j.noDate;
   document.getElementById('jLink').value = j.link;
   const pic = document.getElementById('jPic'), txt = document.getElementById('jPicTxt');
   if(j.logo){ pic.src = j.logo; pic.hidden = false; txt.hidden = true; }
@@ -880,19 +960,13 @@ function drawJob(){
   saveDrafts();
 }
 
-['jRole','jLast','jLink'].forEach(id=>{
-  const key = {jRole:'role', jLast:'last', jLink:'link'}[id];
+['jRole','jLink'].forEach(id=>{
+  const key = {jRole:'role', jLink:'link'}[id];
   document.getElementById(id).addEventListener('input',e=>{
     drafts[at][key] = e.target.value;
     markMissing();
     saveDrafts();
   });
-});
-
-document.getElementById('jNoDate').addEventListener('change',e=>{
-  drafts[at].noDate = e.target.checked;
-  if(e.target.checked) drafts[at].last = '';
-  drawJob();
 });
 
 document.getElementById('jLogo').addEventListener('change',e=>{
@@ -921,7 +995,6 @@ function missingOf(j){
   const out = [];
   if(!j.logo) out.push('company logo');
   if(!(j.role||'').trim()) out.push('role');
-  if(!j.noDate && !j.last) out.push('last date');
   if(!(j.link||'').trim()) out.push('apply link');
   return out;
 }
@@ -931,7 +1004,6 @@ function markMissing(){
   const set = (el,bad)=>{ if(el) el.classList.toggle('miss', !!bad); };
   set(document.getElementById('jPicWrap'), !j.logo);
   set(document.getElementById('jRole').closest('.f'), !(j.role||'').trim());
-  set(document.getElementById('jLast').closest('.f'), !j.noDate && !j.last);
   set(document.getElementById('jLink').closest('.f'), !(j.link||'').trim());
 }
 
@@ -1028,8 +1100,8 @@ document.getElementById('jPublish').addEventListener('click', async ()=>{
   const add = ready.map((j,i)=>({
     id: 'a'+stamp+'_'+i,
     role: j.role, logo: j.logo, link: j.link,
-    closes: j.noDate ? '' : j.last,
-    noDate: !!j.noDate,
+    closes: '',
+    noDate: true,
     points: j.points.filter(p=>p.k && p.v),
     qs: hasQs(j) ? j.qs : null,
     at: new Date().toISOString()
@@ -1059,8 +1131,7 @@ async function loadLive(){
     return;
   }
   box.innerHTML = liveJobs.slice().reverse().map((j,i)=>{
-    const when = j.noDate || !j.closes ? 'Closes one month after posting'
-                                       : 'Last date ' + new Date(j.closes).toDateString().slice(4);
+    const when = 'Closes one month after posting';
     return '<div class="live">'+
       (j.logo ? '<img src="'+esc(j.logo)+'" alt="">' : '')+
       '<span class="live-b">'+

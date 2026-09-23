@@ -38,11 +38,24 @@ export default async (req) => {
 
 /* ---------------- counters ---------------- */
 
-const EVENTS = [
-  "visit", "share", "user_new", "user_old",
-  "jobs_done", "job_questions", "qa_page", "qa_next",
-  "profile", "lead_yes", "lead_no", "job_view"
-];
+// how each dashboard number is counted:
+//   "people" -> how many different phones did it (repeats do not add)
+//   "hits"   -> how many times it was done (repeats DO add)
+const EVENTS = {
+  visit:          "people",   // one phone opening the site 10 times = 1 visitor
+  share:          "hits",     // every share counts, same phone or not
+  user_new:       "people",
+  user_old:       "people",
+  jobs_done:      "people",   // people waiting for new jobs
+  job_questions:  "hits",     // every tap of the blue button / Q&A button
+  qa_page:        "hits",     // every opening of the Interview Q&A page
+  qa_next:        "hits",     // every Next, on both pages
+  profile:        "people",
+  lead_yes:       "hits",
+  lead_no:        "hits",
+  job_view:       "people"    // per-job views stay one per phone
+};
+const EVENT_NAMES = Object.keys(EVENTS);
 
 async function readJSON(store, key, fallback) {
   try {
@@ -56,7 +69,7 @@ async function event(req, store) {
   let body = {};
   try { body = await req.json(); } catch { /* ignore */ }
   const name = String(body.name || "").slice(0, 40);
-  if (EVENTS.indexOf(name) === -1) return json({ ok: false, error: "unknown event" }, 400);
+  if (!EVENTS[name]) return json({ ok: false, error: "unknown event" }, 400);
 
   const day = today();
 
@@ -70,7 +83,14 @@ async function event(req, store) {
   // Each event gets its OWN store key.  A visitor fires several events at
   // once when the page opens; if they all wrote one shared file, the last
   // write would wipe the others and the boxes would disagree.
-  if (uid) await remember(store, "eu_" + name, uid, day);
+  if (uid) {
+    if (EVENTS[name] === "hits") {
+      const tap = str(body.tap).slice(0, 40).replace(/[^A-Za-z0-9_-]/g, "")
+               || (uid + "_" + Date.now() + "_" + Math.random().toString(36).slice(2, 8));
+      await bump(store, "hc_" + name, tap, day);
+    }
+    else await remember(store, "eu_" + name, uid, day);
+  }
 
   // per-job view counts for the panel's "Uploaded jobs" list
   if (name === "job_view" && uid) {
@@ -88,21 +108,39 @@ async function stats(store) {
     const ms = Date.parse(d + "T00:00:00Z");
     return !isNaN(ms) && Date.now() - ms < n * 86400000;
   };
+
   const out = {};
-  const maps = await Promise.all(EVENTS.map(n => readJSON(store, "eu_" + n, {})));
-  EVENTS.forEach((name, i) => {
+  const keys = EVENT_NAMES.map(n => (EVENTS[n] === "hits" ? "hc_" : "eu_") + n);
+  const maps = await Promise.all(keys.map(k => readJSON(store, k, {})));
+
+  EVENT_NAMES.forEach((name, i) => {
     const map = maps[i];
     const box = { today: 0, week: 0, month: 0, total: 0 };
-    for (const id of Object.keys(map)) {
-      const last = map[id][1];
-      box.total++;
-      if (last === day) box.today++;
-      if (within(last, 7)) box.week++;
-      if (within(last, 30)) box.month++;
+
+    if (EVENTS[name] === "hits") {
+      // { "2026-09-23": { tapId: 1, ... } }  -> every tap counts
+      for (const d of Object.keys(map)) {
+        const n = countDay(map[d]);
+        box.total += n;
+        if (d === day) box.today += n;
+        if (within(d, 7)) box.week += n;
+        if (within(d, 30)) box.month += n;
+      }
+    } else {
+      // { uid: [firstDay, lastDay] }  -> count each phone once
+      for (const id of Object.keys(map)) {
+        const last = (map[id] || [])[1];
+        box.total++;
+        if (last === day) box.today++;
+        if (within(last, 7)) box.week++;
+        if (within(last, 30)) box.month++;
+      }
     }
     out[name] = box;
   });
-  // New / returning users are counted per device, not per page load.
+
+  // New  = phones seen here for the very first time in that stretch.
+  // Back = phones that have come again on a later day.
   const devices = await readJSON(store, "devices", {});
   const fresh = { today: 0, week: 0, month: 0, total: 0 };
   const back = { today: 0, week: 0, month: 0, total: 0 };
@@ -120,9 +158,51 @@ async function stats(store) {
       if (within(last, 30)) back.month++;
     }
   }
-  if (fresh.total) { out.user_new = fresh; out.user_old = back; }
+  out.user_new = fresh;
+  out.user_old = back;
 
   return json({ ok: true, stats: out });
+}
+
+/* Record one tap.
+   Counting with "+1" loses taps when two writes cross, so instead every tap
+   arrives with its own id and we store the id.  Storing the same id twice
+   changes nothing, and we can check afterwards whether ours really is in
+   there — if it is not, we write again.  Nothing is ever lost or doubled. */
+const DAY_CAP = 4000;              // ids kept per day before they are rolled up
+
+async function bump(store, key, tap, day) {
+  for (let attempt = 0; attempt < 8; attempt++) {
+    const map = await readJSON(store, key, {});
+    const box = map[day] || (map[day] = {});
+    if (box[tap]) return;                       // already counted
+    box[tap] = 1;
+
+    // roll older ids into a plain number so one busy day cannot grow forever
+    const ids = Object.keys(box).filter(k => k !== "#");
+    if (ids.length > DAY_CAP) {
+      const drop = ids.slice(0, ids.length - DAY_CAP);
+      if (drop.indexOf(tap) === -1) {
+        box["#"] = (box["#"] || 0) + drop.length;
+        for (const k of drop) delete box[k];
+      }
+    }
+    const days = Object.keys(map).sort();
+    if (days.length > 40) for (const d of days.slice(0, days.length - 40)) delete map[d];
+
+    await store.setJSON(key, map);
+
+    const check = await readJSON(store, key, {});
+    if ((check[day] || {})[tap]) return;
+    await new Promise(r => setTimeout(r, 20 + Math.floor(Math.random() * 140)));
+  }
+}
+
+function countDay(box) {
+  if (!box) return 0;
+  let n = box["#"] || 0;
+  for (const k of Object.keys(box)) if (k !== "#") n++;
+  return n;
 }
 
 /* Add one device to an event's list.
@@ -153,7 +233,8 @@ async function reset(store) {
     jobIds = (saved.jobs || []).map(j => "jv_" + String(j.id || "").replace(/[^A-Za-z0-9_-]/g, ""));
   } catch { /* no jobs yet */ }
   const keys = ["counters", "devices", "euids", "jobviews"]
-    .concat(EVENTS.map(n => "eu_" + n))
+    .concat(EVENT_NAMES.map(n => "eu_" + n))
+    .concat(EVENT_NAMES.map(n => "hc_" + n))
     .concat(jobIds);
   for (const key of keys) {
     try { await store.setJSON(key, {}); } catch { /* nothing there */ }
