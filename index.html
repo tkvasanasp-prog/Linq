@@ -4160,7 +4160,7 @@ window.LQ=(function(){
       '<button type="button" class="sbtn" id="jPrev"'+(idx===0?' disabled':'')+'>'+sic(pPrev)+'Previous</button>';
 
     const apply=document.getElementById('jApply');
-    if(apply)apply.addEventListener('click',()=>{window.location.href=j.link||'https://www.placify.live';});
+    if(apply)apply.addEventListener('click',()=>{ if(j.link)window.location.href=j.link; });
 
     const openJobQs=(job,logo)=>{
       const pageEl=document.getElementById('jqPage');
