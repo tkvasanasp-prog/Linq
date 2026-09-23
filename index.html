@@ -1184,7 +1184,7 @@ button#next.pagebtn:disabled{
 }
 
 /* ---- opening splash: JobsLink + Interview Questions -> LinQ ---- */
-.splash{display:none!important;
+.splash{
   position:fixed;inset:0;z-index:5000;
   background:#fff;
   display:flex;flex-direction:column;align-items:center;justify-content:center;gap:26px;
@@ -1447,7 +1447,26 @@ body.splashing .jside{visibility:hidden}
 
 <div class="phone"><div class="screen">
 
-<!-- opening animation removed for now -->
+<div class="splash" id="splash" aria-hidden="true">
+  <div class="sp-line" id="spLine"><span class="sp-b">J</span><span class="sp-b">o</span><span class="sp-b">b</span><span class="sp-b">s</span><span class="sp-b keep">L</span><span class="sp-b keep">i</span><span class="sp-b keep">n</span><span class="sp-b">k</span><span class="sp-g">&nbsp;+&nbsp;</span><span class="sp-r">I</span><span class="sp-r">n</span><span class="sp-r">t</span><span class="sp-r">e</span><span class="sp-r">r</span><span class="sp-r">v</span><span class="sp-r">i</span><span class="sp-r">e</span><span class="sp-r">w</span><span class="sp-r">&nbsp;</span><span class="sp-r keep">Q</span><span class="sp-r">u</span><span class="sp-r">e</span><span class="sp-r">s</span><span class="sp-r">t</span><span class="sp-r">i</span><span class="sp-r">o</span><span class="sp-r">n</span><span class="sp-r">s</span></div>
+  <div class="sp-dots" aria-hidden="true"><i></i><i></i><i></i></div>
+</div>
+<script>
+/* Runs here, right after the animation, not at the end of the file — so a
+   slow connection can never leave it sitting on screen. */
+(function(){
+  var sp=document.getElementById('splash');
+  if(!sp)return;
+  var go=function(){ document.body && document.body.classList.add('splashing'); };
+  if(document.body)go(); else document.addEventListener('DOMContentLoaded',go);
+  setTimeout(function(){ sp.classList.add('merge'); },1900);
+  setTimeout(function(){
+    sp.classList.add('gone');
+    document.body && document.body.classList.remove('splashing');
+  },3950);
+  setTimeout(function(){ if(sp.parentNode)sp.parentNode.removeChild(sp); },4550);
+})();
+</script>
 
 <div class="ticker" aria-label="Companies that hire across these domains">
   <div class="track" id="track"></div>
@@ -4413,22 +4432,7 @@ window.LQ=(function(){
   }catch(e){}
 })();
 
-// ---- opening splash ----
-(function(){
-  const sp=document.getElementById('splash');
-  if(!sp)return;
-  sp.remove();
-  return;
-  /* the opening animation is off for now
-  document.body.classList.add('splashing');
-  setTimeout(()=>sp.classList.add('merge'),1900);
-  setTimeout(()=>{
-    sp.classList.add('gone');
-    document.body.classList.remove('splashing');
-  },3950);
-  setTimeout(()=>{sp.remove();},4550);
-  */
-})();
+
 </script>
 </body>
 </html>
