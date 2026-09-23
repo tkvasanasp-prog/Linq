@@ -244,6 +244,25 @@ async function reset(store) {
 
 /* ---------------- jobs ---------------- */
 
+/* A job disappears from the website the day after its last date, stays in
+   the Expired list for 3 more days, then is deleted for good — here. */
+function stillKeep(j) {
+  let closes;
+  if (j.noDate || !j.closes) {
+    const posted = j.at ? new Date(j.at) : new Date();
+    closes = new Date(posted.getTime());
+    closes.setMonth(closes.getMonth() + 1);
+  } else {
+    const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(String(j.closes));
+    closes = m ? new Date(+m[1], +m[2] - 1, +m[3]) : new Date(j.closes);
+  }
+  if (isNaN(closes)) return true;                 // unreadable date: keep it
+  closes.setHours(0, 0, 0, 0);
+  const now = new Date(); now.setHours(0, 0, 0, 0);
+  const days = Math.round((closes - now) / 86400000);
+  return days >= -3;
+}
+
 async function jobs(req, store) {
   if (req.method === "POST") {
     let body = {};
@@ -253,7 +272,11 @@ async function jobs(req, store) {
     return json({ ok: true, count: list.length });
   }
   const saved = await readJSON(store, "jobs", { jobs: [] });
-  const list = saved.jobs || [];
+  const all = saved.jobs || [];
+  const list = all.filter(stillKeep);
+  if (list.length !== all.length) {
+    await store.setJSON("jobs", { jobs: list, at: new Date().toISOString() });
+  }
   const ids = list.map(j => String(j.id || "").replace(/[^A-Za-z0-9_-]/g, ""));
   const maps = await Promise.all(ids.map(id => id ? readJSON(store, "jv_" + id, {}) : {}));
   const views = {};

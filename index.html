@@ -4164,11 +4164,9 @@ window.LQ=(function(){
       '</div>'+
       '<h2 class="jrole'+A+'"'+dly()+'>'+j.role+'</h2>'+
       '<div class="jgrid">'+
-        (j.lastShown||(j.points&&j.points.length)
-          ? item(iFlag,'Last Date',j.lastShown||fmt(j.closes))+
-            (j.points||[]).map(p=>item(iFlag,p.k,p.v)).join('')
-          : item(iFlag,'Last Date',fmt(j.closes))+
-            item(iCap,'Qualification',j.qual)+
+        ((j.points&&j.points.length)
+          ? (j.points||[]).map(p=>item(iFlag,p.k,p.v)).join('')
+          : item(iCap,'Qualification',j.qual)+
             item(iUsers,'Eligibility',j.elig)+
             item(iCal,'Interview date',fmt(j.interview))+
             item(iCash,'Package',j.lpa)+
@@ -4422,6 +4420,9 @@ window.LQ=(function(){
 (function(){
   const sp=document.getElementById('splash');
   if(!sp)return;
+  sp.remove();
+  return;
+  /* the opening animation is off for now
   document.body.classList.add('splashing');
   setTimeout(()=>sp.classList.add('merge'),1900);
   setTimeout(()=>{
@@ -4429,6 +4430,7 @@ window.LQ=(function(){
     document.body.classList.remove('splashing');
   },3950);
   setTimeout(()=>{sp.remove();},4550);
+  */
 })();
 </script>
 </body>

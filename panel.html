@@ -440,6 +440,12 @@ nav .ic{position:relative;display:block}
 
         <label class="f"><span>Role <i class="req">*</i></span><input id="jRole" type="text" placeholder="e.g. Data Analyst Trainee"></label>
 
+        <label class="f"><span>Last date <i class="req">*</i>
+          ( when the job expires — students never see this )</span>
+          <input id="jLast" type="date"></label>
+        <label class="check"><input type="checkbox" id="jNoDate"><span>Not mentioned
+          &nbsp;<i>— the job then closes one month after publishing</i></span></label>
+
         <label class="f"><span>Apply link <i class="req">*</i> ( opens when a user taps Apply )</span>
           <span class="linkrow">
             <input id="jLink" type="url" placeholder="" autocomplete="off" autocorrect="off"
@@ -890,7 +896,7 @@ function download(name, text, type){
 
 /* ================= upload jobs ================= */
 const BLANK = () => ({
-  role:'', link:'', logo:'',
+  role:'', last:'', noDate:false, link:'', logo:'',
   points:[{k:'',v:''}],
   qs:{rep:[],bas:[],exp:[]}
 });
@@ -898,6 +904,8 @@ const BLANK = () => ({
 let drafts = local.get('linq_drafts', [BLANK()]);
 // older drafts were saved with six empty boxes — clear those out
 drafts.forEach(d=>{
+  if(typeof d.last !== 'string') d.last = '';
+  if(typeof d.noDate !== 'boolean') d.noDate = false;
   if(!Array.isArray(d.points)) { d.points = [{k:'',v:''}]; return; }
   while(d.points.length > 1){
     const last = d.points[d.points.length-1];
@@ -976,6 +984,9 @@ function drawJob(){
   trimPoints(j);
   document.getElementById('jCount').textContent = 'Job ' + (at+1) + ' of ' + drafts.length;
   document.getElementById('jRole').value = j.role;
+  document.getElementById('jLast').value = j.last || '';
+  document.getElementById('jLast').disabled = !!j.noDate;
+  document.getElementById('jNoDate').checked = !!j.noDate;
   document.getElementById('jLink').value = j.link || '';
   paintLinkX();
   const pic = document.getElementById('jPic'), txt = document.getElementById('jPicTxt');
@@ -997,8 +1008,14 @@ if(linkX) linkX.addEventListener('click',()=>{
   paintLinkX(); markMissing(); saveDrafts(); el.focus();
 });
 
-['jRole','jLink'].forEach(id=>{
-  const key = {jRole:'role', jLink:'link'}[id];
+document.getElementById('jNoDate').addEventListener('change',e=>{
+  drafts[at].noDate = e.target.checked;
+  if(e.target.checked) drafts[at].last = '';
+  drawJob(); markMissing();
+});
+
+['jRole','jLast','jLink'].forEach(id=>{
+  const key = {jRole:'role', jLast:'last', jLink:'link'}[id];
   document.getElementById(id).addEventListener('input',e=>{
     drafts[at][key] = e.target.value;
     paintLinkX();
@@ -1033,6 +1050,7 @@ function missingOf(j){
   const out = [];
   if(!j.logo) out.push('company logo');
   if(!(j.role||'').trim()) out.push('role');
+  if(!j.noDate && !(j.last||'').trim()) out.push('last date');
   if(!(j.link||'').trim()) out.push('apply link');
   return out;
 }
@@ -1042,6 +1060,7 @@ function markMissing(){
   const set = (el,bad)=>{ if(el) el.classList.toggle('miss', !!bad); };
   set(document.getElementById('jPicWrap'), !j.logo);
   set(document.getElementById('jRole').closest('.f'), !(j.role||'').trim());
+  set(document.getElementById('jLast').closest('.f'), !j.noDate && !(j.last||'').trim());
   set(document.getElementById('jLink').closest('.f'), !(j.link||'').trim());
 }
 
@@ -1138,8 +1157,8 @@ document.getElementById('jPublish').addEventListener('click', async ()=>{
   const add = ready.map((j,i)=>({
     id: 'a'+stamp+'_'+i,
     role: j.role, logo: j.logo, link: j.link,
-    closes: '',
-    noDate: true,
+    closes: j.noDate ? '' : j.last,
+    noDate: !!j.noDate,
     points: j.points.filter(p=>p.k && p.v),
     qs: hasQs(j) ? j.qs : null,
     at: new Date().toISOString()
@@ -1169,7 +1188,8 @@ async function loadLive(){
     return;
   }
   box.innerHTML = liveJobs.slice().reverse().map((j,i)=>{
-    const when = 'Closes one month after posting';
+    const when = j.noDate || !j.closes ? 'Closes one month after posting'
+                                       : 'Last date ' + new Date(j.closes).toDateString().slice(4);
     return '<div class="live">'+
       (j.logo ? '<img src="'+esc(j.logo)+'" alt="">' : '')+
       '<span class="live-b">'+
