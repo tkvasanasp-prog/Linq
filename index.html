@@ -545,7 +545,7 @@ body.offers .screen{display:flex;flex-direction:column;min-height:100vh}
   width:7px;height:7px;border-radius:50%;background:#fff;
   animation:newpulse 1.5s ease-in-out infinite;
 }
-body.jobs-on .shell,body.jobs-on .train,body.jobs-on .prof,body.jobs-on #offPage{display:none}
+body.jobs-on .shell,body.jobs-on .train,body.jobs-on .prof,body.jobs-on #offPage{display:none!important}
 body.jobs-on #jobsPage{display:block}
 
 .prof-empty{text-align:center;padding:10.1px 2.9px}
@@ -1435,7 +1435,7 @@ body.splashing .jside{visibility:hidden}
 
 </style>
 </head>
-<body>
+<body class="jobs-on">
 
 <div class="deskblock" id="deskBlock">
   <div class="db-box">
@@ -1586,7 +1586,7 @@ body.splashing .jside{visibility:hidden}
     </div>
   </section>
 
-  <section class="jobs" id="jobsPage" hidden>
+  <section class="jobs" id="jobsPage">
     <div class="jtags" id="jtags" role="tablist" aria-label="Job lists"></div>
     <div class="jwrap">
       <div id="jobBody"></div>
@@ -1751,7 +1751,7 @@ body.splashing .jside{visibility:hidden}
   </div>
 </div>
 <nav class="tabbar" aria-label="Sections">
-  <a class="tabitem" href="#" id="tabJ">
+  <a class="tabitem is-on" href="#" id="tabJ">
     <span class="ti">
       <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
         <path fill="currentColor" d="M9.5 4A1.5 1.5 0 0 0 8 5.5V7H4.8A2.8 2.8 0 0 0 2 9.8V18a2.8 2.8 0 0 0 2.8 2.8h14.4A2.8 2.8 0 0 0 22 18V9.8A2.8 2.8 0 0 0 19.2 7H16V5.5A1.5 1.5 0 0 0 14.5 4zm.5 3V5.8h4V7zM4 13.2h6v1.1a.9.9 0 0 0 .9.9h2.2a.9.9 0 0 0 .9-.9v-1.1h6V18a.8.8 0 0 1-.8.8H4.8A.8.8 0 0 1 4 18z"/>
