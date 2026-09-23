@@ -3207,11 +3207,24 @@ const adWait=document.getElementById('adWait');
 function esc(s){return String(s).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));}
 let skips=0,pendingIdx=null,leadNext=null,leadCo=null;
 
+// Someone who submitted the form is left alone for 30 days, then the
+// offer may appear again.  Saying "No" changes nothing — it keeps coming
+// back every third job as usual.
+const LEAD_QUIET=30*86400000;
 function leadDone(){
-  try{return localStorage.getItem('pf_lead')==='done';}catch(e){return false;}
+  try{
+    const v=localStorage.getItem('pf_lead');
+    if(!v)return false;
+    if(v==='done'){                     // saved by an older version — start the 30 days now
+      localStorage.setItem('pf_lead',String(Date.now()));
+      return true;
+    }
+    const at=+v;
+    return !!at && (Date.now()-at < LEAD_QUIET);
+  }catch(e){ return false; }
 }
 function markLeadDone(){
-  try{localStorage.setItem('pf_lead','done');}catch(e){}
+  try{localStorage.setItem('pf_lead',String(Date.now()));}catch(e){}
 }
 function currentCompany(){
   if(leadCo)return leadCo;
