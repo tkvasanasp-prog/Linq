@@ -1184,7 +1184,7 @@ button#next.pagebtn:disabled{
 }
 
 /* ---- opening splash: JobsLink + Interview Questions -> LinQ ---- */
-.splash{
+.splash{display:none!important;
   position:fixed;inset:0;z-index:5000;
   background:#fff;
   display:flex;flex-direction:column;align-items:center;justify-content:center;gap:26px;
@@ -1447,10 +1447,7 @@ body.splashing .jside{visibility:hidden}
 
 <div class="phone"><div class="screen">
 
-<div class="splash" id="splash" aria-hidden="true">
-  <div class="sp-line" id="spLine"><span class="sp-b">J</span><span class="sp-b">o</span><span class="sp-b">b</span><span class="sp-b">s</span><span class="sp-b keep">L</span><span class="sp-b keep">i</span><span class="sp-b keep">n</span><span class="sp-b">k</span><span class="sp-g">&nbsp;+&nbsp;</span><span class="sp-r">I</span><span class="sp-r">n</span><span class="sp-r">t</span><span class="sp-r">e</span><span class="sp-r">r</span><span class="sp-r">v</span><span class="sp-r">i</span><span class="sp-r">e</span><span class="sp-r">w</span><span class="sp-r">&nbsp;</span><span class="sp-r keep">Q</span><span class="sp-r">u</span><span class="sp-r">e</span><span class="sp-r">s</span><span class="sp-r">t</span><span class="sp-r">i</span><span class="sp-r">o</span><span class="sp-r">n</span><span class="sp-r">s</span></div>
-  <div class="sp-dots" aria-hidden="true"><i></i><i></i><i></i></div>
-</div>
+<!-- opening animation removed for now -->
 
 <div class="ticker" aria-label="Companies that hire across these domains">
   <div class="track" id="track"></div>
