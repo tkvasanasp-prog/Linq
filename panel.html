@@ -188,6 +188,14 @@ nav .ic{position:relative;display:block}
   background:var(--panel);border:1px solid var(--line);border-radius:12px;
   padding:10px;margin-bottom:9px;
 }
+.linkrow{position:relative;display:block}
+.linkrow input{padding-right:38px!important}
+.linkx{
+  position:absolute;right:6px;top:50%;transform:translateY(-50%);
+  width:26px;height:26px;border-radius:50%;cursor:pointer;
+  border:0;background:var(--panel-2);color:var(--spark-lit);
+  font:700 16px/1 system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+}
 .pt-h{display:flex;align-items:center;justify-content:space-between;margin-bottom:7px}
 .pt-n{color:var(--spark);font:700 10.4px ui-monospace,"SF Mono",Menlo,Consolas,"Roboto Mono",monospace}
 .pt input{background:#fff}
@@ -432,7 +440,13 @@ nav .ic{position:relative;display:block}
 
         <label class="f"><span>Role <i class="req">*</i></span><input id="jRole" type="text" placeholder="e.g. Data Analyst Trainee"></label>
 
-        <label class="f"><span>Apply link <i class="req">*</i> ( opens when a user taps Apply )</span><input id="jLink" type="url" placeholder=""></label>
+        <label class="f"><span>Apply link <i class="req">*</i> ( opens when a user taps Apply )</span>
+          <span class="linkrow">
+            <input id="jLink" type="url" placeholder="" autocomplete="off" autocorrect="off"
+                   autocapitalize="off" spellcheck="false" name="lq-apply-link">
+            <button type="button" class="linkx" id="jLinkX" aria-label="Clear the link" hidden>&times;</button>
+          </span>
+        </label>
 
         <div class="sec-h" style="margin-top:16px">Job details <span class="opt">( optional )</span></div>
         <p class="hint">Points are optional. Fill this one if you want, and tap "Add point" for another — up to 20.</p>
@@ -962,7 +976,8 @@ function drawJob(){
   trimPoints(j);
   document.getElementById('jCount').textContent = 'Job ' + (at+1) + ' of ' + drafts.length;
   document.getElementById('jRole').value = j.role;
-  document.getElementById('jLink').value = j.link;
+  document.getElementById('jLink').value = j.link || '';
+  paintLinkX();
   const pic = document.getElementById('jPic'), txt = document.getElementById('jPicTxt');
   if(j.logo){ pic.src = j.logo; pic.hidden = false; txt.hidden = true; }
   else { pic.hidden = true; txt.hidden = false; }
@@ -972,10 +987,21 @@ function drawJob(){
   saveDrafts();
 }
 
+const linkX = document.getElementById('jLinkX');
+function paintLinkX(){
+  if(linkX) linkX.hidden = !document.getElementById('jLink').value;
+}
+if(linkX) linkX.addEventListener('click',()=>{
+  const el = document.getElementById('jLink');
+  el.value = ''; drafts[at].link = '';
+  paintLinkX(); markMissing(); saveDrafts(); el.focus();
+});
+
 ['jRole','jLink'].forEach(id=>{
   const key = {jRole:'role', jLink:'link'}[id];
   document.getElementById(id).addEventListener('input',e=>{
     drafts[at][key] = e.target.value;
+    paintLinkX();
     markMissing();
     saveDrafts();
   });
