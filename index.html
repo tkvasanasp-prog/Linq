@@ -227,9 +227,14 @@ body.formopen .news{opacity:.35}
 .ad-logo{
   color:#0A6BFF;
   font:700 30px/1.25 system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
-  letter-spacing:.07em;
+  letter-spacing:.045em;
+  font-kerning:none;
+  font-feature-settings:"kern" 0;
+  font-variant-ligatures:none;
+  text-rendering:geometricPrecision;
 }
 .ad-logo b{color:#E4142A;font-weight:700}
+.ad-logo .nm{letter-spacing:.07em}
 .lead-back{
   position:absolute;top:12px;right:12px;
   width:34px;height:34px;border-radius:50%;
@@ -434,7 +439,7 @@ body.offers .screen{display:flex;flex-direction:column;min-height:100vh}
 .sbtn:disabled{opacity:.4;cursor:default}
 .sbtn:active .sic{transform:scale(.94)}
 .jhead{position:relative;display:flex;align-items:center;gap:7.9px;margin-bottom:10.1px;margin-right:-47.5px}
-.jlogo{height:28px;width:auto;max-width:96px;object-fit:contain}
+.jlogo{height:36px;width:auto;max-width:124px;object-fit:contain}
 .jco{font:500 14.1px system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;color:var(--dim)}
 .jstat{
   margin-left:auto;flex:none;
@@ -666,7 +671,13 @@ body.profile .screen{display:flex;flex-direction:column;min-height:100vh}
   background:var(--ink);border:1px solid var(--line);border-radius:9px;
   color:var(--paper);font:400 13.7px system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
 }
-.lead-f select{appearance:none;-webkit-appearance:none;padding-right:21.6px}
+.lead-f select{
+  appearance:none;-webkit-appearance:none;-moz-appearance:none;padding-right:30px;
+  background-image:url("data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 8'%3E%3Cpath d='M1 1.5L6 6.5L11 1.5' fill='none' stroke='%23ffffff' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round' opacity='.75'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;
+  background-position:right 10px center;
+  background-size:12px 8px;
+}
 .lead-f input:focus,.lead-f select:focus{
   outline:none;border-color:var(--spark);
   box-shadow:0 0 0 3px rgba(10,107,255,.2);
@@ -1459,22 +1470,24 @@ body.splashing .jside{visibility:hidden}
 .jtoast.on{opacity:1;transform:translateX(-50%) translateY(0)}
 
 
-/* ---- desktop / laptop: mobile-only notice ---- */
+/* ---- phones only: everything else gets the notice ---- */
 .deskblock{display:none}
-@media (min-width:820px){
-  .deskblock{
-    display:flex;position:fixed;inset:0;z-index:2000;
-    background:var(--ink);align-items:center;justify-content:center;padding:32px;
-  }
-  body.blocked{overflow:hidden}
-  .db-box{max-width:420px;text-align:center}
-  .db-mark{font:800 49.3px system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;letter-spacing:-.02em;margin-bottom:14px}
-  .db-mark span{color:#0A57D0}
-  .db-mark b{color:#E4142A}
-  .db-t{color:var(--paper);font:800 29.1px system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;margin-bottom:10px}
-  .db-s{color:var(--dim);font:400 16.8px/1.6 system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif}
-  .db-hint{color:var(--spark);font:600 14.6px system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;margin-top:14px}
+body.blocked .splash,
+body.blocked .tabbar,
+body.blocked .wabar,
+body.blocked .wacloud{display:none!important}
+body.blocked .deskblock{
+  display:flex;position:fixed;inset:0;z-index:6000;
+  background:var(--ink);align-items:center;justify-content:center;padding:32px;
 }
+body.blocked{overflow:hidden}
+.db-box{max-width:420px;text-align:center}
+.db-mark{font:800 49.3px system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;letter-spacing:-.02em;margin-bottom:14px}
+.db-mark span{color:#0A57D0}
+.db-mark b{color:#E4142A}
+.db-t{color:var(--paper);font:800 29.1px system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;margin-bottom:10px}
+.db-s{color:var(--dim);font:400 16.8px/1.6 system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif}
+.db-hint{color:var(--spark);font:600 14.6px system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;margin-top:14px}
 
 </style>
 </head>
@@ -1742,7 +1755,7 @@ body.splashing .jside{visibility:hidden}
 </div>
 <div class="ad" id="ad" hidden>
   <div class="ad-wait" id="adWait" hidden>
-    <p class="ad-logo">lin<b>q</b>jobs.in</p>
+    <p class="ad-logo"><span class="nm">lin<b>q</b>job</span>s.com</p>
     <div class="spin" aria-hidden="true"></div>
   </div>
 
@@ -4546,13 +4559,26 @@ window.LQ=(function(){
   }catch(e){}
 })();
 
-// ---- desktop block ----
+// ---- phones only ----
 (function(){
   try{
-    const wide = window.matchMedia('(min-width:820px)');
-    const apply = () => document.body.classList.toggle('blocked', wide.matches);
+    // A phone is a touch device whose screen's short side is small.
+    // Turning the phone sideways must NOT trigger this, so we look at the
+    // screen itself, not the window.  No touch at all means a computer.
+    const apply=()=>{
+      let block=false;
+      try{
+        const touch=(navigator.maxTouchPoints||0)>0 ||
+                    window.matchMedia('(any-pointer:coarse)').matches;
+        const short=Math.min(screen.width||0, screen.height||0) ||
+                    Math.min(window.innerWidth, window.innerHeight);
+        block = !touch || short >= 600;      // computer, or a tablet
+      }catch(e){ block=false; }
+      document.body.classList.toggle('blocked', block);
+    };
     apply();
-    wide.addEventListener ? wide.addEventListener('change',apply) : wide.addListener(apply);
+    window.addEventListener('orientationchange',()=>setTimeout(apply,200));
+    window.addEventListener('resize',apply);
   }catch(e){}
 })();
 
