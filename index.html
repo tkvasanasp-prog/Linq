@@ -433,8 +433,8 @@ body.offers .screen{display:flex;flex-direction:column;min-height:100vh}
 .sbtn.on{color:var(--spark)}
 .sbtn:disabled{opacity:.4;cursor:default}
 .sbtn:active .sic{transform:scale(.94)}
-.jhead{display:flex;align-items:flex-start;gap:7.9px;margin-bottom:10.1px;margin-right:-47.5px}
-.jlogo{height:28px;margin-top:1px;width:auto;max-width:96px;object-fit:contain}
+.jhead{position:relative;display:flex;align-items:center;gap:7.9px;margin-bottom:10.1px;margin-right:-47.5px}
+.jlogo{height:28px;width:auto;max-width:96px;object-fit:contain}
 .jco{font:500 14.1px system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;color:var(--dim)}
 .jstat{
   margin-left:auto;flex:none;
@@ -443,29 +443,16 @@ body.offers .screen{display:flex;flex-direction:column;min-height:100vh}
 }
 .jstat.live{background:rgba(16,150,80,.13);color:#127C3C}
 .jstat.dead{background:rgba(214,32,48,.11);color:#C2202F}
-.jstat-col{
-  margin-left:auto;flex:none;
-  display:flex;flex-direction:column;align-items:flex-end;gap:7px;
-}
-.jstat-col .jstat{margin-left:0}
-.jwa{
-  width:42px;height:42px;border-radius:50%;
-  display:grid;place-items:center;
-  background:#fff;border:1px solid var(--line);
-  color:#25D366;line-height:0;
-  box-shadow:0 4px 14px rgba(16,40,80,.12);
-}
-.jwa:active{transform:translateY(1px)}
 
 /* "Connect now" bar above the tab bar on the waiting screen */
 .wabar{
   position:fixed;left:0;right:0;z-index:13;
   bottom:90px;
   display:flex;align-items:center;justify-content:center;gap:9px;
-  margin:0 auto;width:max-content;max-width:92vw;
-  padding:10px 17px;border-radius:999px;
-  background:#25D366;color:#fff;text-decoration:none;
-  font:700 13.4px system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  margin:0 auto;width:max-content;max-width:96vw;
+  padding:14px 20px;border-radius:999px;
+  background:#25D366;color:#fff;text-decoration:none;white-space:nowrap;
+  font:700 12.8px/1.2 system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
   box-shadow:0 12px 26px rgba(37,211,102,.34);
 }
 .wabar svg{flex:none}
@@ -737,13 +724,36 @@ body:not(.inside) .rail{
   width:100%;max-width:480px;margin:0 auto;padding-top:0;
 }
 body.inside .stage{margin:0 auto}
-.share{flex:none;display:flex;align-items:center;gap:8.6px}
-.sharebtn{
-  display:inline-flex;align-items:center;gap:5.8px;cursor:pointer;
-  background:var(--spark);border:0;border-radius:9px;
-  color:#fff;padding:6.5px 10.8px;
-  font:500 13.2px system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+.share{position:relative;flex:none;display:flex;align-items:center;gap:8.6px}
+.wacloud{
+  position:fixed;z-index:40;
+  width:max-content;max-width:78vw;text-align:center;
+  background:#25D366;color:#fff;text-decoration:none;
+  padding:10px 15px;border-radius:13px;
+  font:600 12.2px/1.35 system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  box-shadow:0 10px 22px rgba(37,211,102,.34);
+  animation:wapop .28s cubic-bezier(.2,.9,.3,1.3) both;
 }
+.wacloud::before{
+  content:"";position:absolute;top:-5px;left:var(--waArrow,40px);
+  width:12px;height:12px;background:#25D366;border-radius:2px;
+  transform:rotate(45deg);
+}
+.wacloud[hidden]{display:none}
+@keyframes wapop{from{opacity:0;transform:translateY(-6px) scale(.94)}to{opacity:1;transform:none}}
+.hwa{
+  flex:none;display:grid;place-items:center;
+  width:31px;height:31px;border-radius:9px;
+  background:#25D366;color:#fff;line-height:0;
+}
+.hwa:active{transform:scale(.97)}
+.sharebtn{
+  flex:none;display:grid;place-items:center;cursor:pointer;
+  width:31px;height:31px;padding:0;
+  background:var(--spark);border:0;border-radius:9px;
+  color:#fff;line-height:0;
+}
+.sharebtn span{display:none}
 .sharebtn:hover{background:var(--spark-lit)}
 .sharebtn:active{transform:scale(.97)}
 .sharebtn:focus-visible{outline:2px solid var(--spark-lit);outline-offset:3px}
@@ -1515,6 +1525,9 @@ body.splashing .jside{visibility:hidden}
     <h1 id="brand"><span class="bmark"><span>Lin</span><b>Q</b></span> Jobs</h1>
   </div>
   <div class="share">
+    <a class="hwa" href="https://chat.whatsapp.com/IaGmvdMA5O4ELKlBdCdaYs" target="_blank" rel="noopener" aria-label="Join our WhatsApp group">
+      <svg viewBox="0 0 24 24" width="21" height="21" aria-hidden="true"><path fill="currentColor" d="M19.05 4.91A9.82 9.82 0 0 0 12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2 22l5.25-1.38a9.9 9.9 0 0 0 4.74 1.21h.01c5.46 0 9.9-4.45 9.9-9.91 0-2.65-1.03-5.14-2.85-7.01ZM12 20.15h-.01a8.2 8.2 0 0 1-4.19-1.15l-.3-.18-3.12.82.83-3.04-.2-.31a8.22 8.22 0 0 1-1.26-4.38c0-4.54 3.7-8.23 8.25-8.23a8.2 8.2 0 0 1 8.23 8.24c0 4.54-3.7 8.23-8.23 8.23Zm4.52-6.16c-.25-.12-1.47-.72-1.69-.81-.23-.08-.39-.12-.56.13-.16.24-.64.8-.79.97-.14.16-.29.18-.54.06a6.72 6.72 0 0 1-1.99-1.23 7.5 7.5 0 0 1-1.38-1.71c-.14-.25-.01-.38.11-.5.11-.11.25-.29.37-.43.13-.15.17-.25.25-.41.08-.17.04-.31-.02-.43-.06-.12-.56-1.34-.76-1.84-.2-.48-.41-.42-.56-.42l-.48-.01c-.17 0-.43.06-.66.31-.23.24-.86.84-.86 2.05s.89 2.38 1.01 2.54c.12.17 1.74 2.66 4.22 3.73.59.25 1.05.4 1.41.52.59.19 1.13.16 1.56.1.48-.07 1.47-.6 1.67-1.18.21-.58.21-1.08.15-1.18-.06-.11-.23-.17-.48-.29Z"></path></svg>
+    </a>
     <button id="shareBtn" type="button" class="sharebtn" aria-label="Share this site">
       <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
         <circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle>
@@ -1603,7 +1616,7 @@ body.splashing .jside{visibility:hidden}
       <label class="lead-f"><span>Name</span><input id="tfName" type="text" autocomplete="name" required></label>
       <label class="lead-f"><span>Education</span><input id="tfEdu" type="text" placeholder="e.g. B.E CSE 2025" required></label>
       <label class="lead-f"><span>Contact</span><input id="tfPhone" type="tel" inputmode="numeric" autocomplete="tel" required></label>
-      <label class="lead-f"><span>Training language</span><select id="tfLang"><option value="Tamil">Tamil</option><option value="Hindi">Hindi</option><option value="Telugu">Telugu</option><option value="Kannada">Kannada</option><option value="Malayalam">Malayalam</option></select></label>
+      <label class="lead-f"><span>Training language</span><select id="tfLang" required><option value="">Choose your language</option><option value="Tamil">Tamil</option><option value="Hindi">Hindi</option><option value="Telugu">Telugu</option><option value="Kannada">Kannada</option><option value="Malayalam">Malayalam</option></select></label>
       <label class="lead-f"><span>Select domain</span><select id="tfDomain" required><option value="">Choose a domain</option></select></label>
       <label class="lead-f"><span>Location</span><input id="tfLoc" type="text" placeholder="City" required></label>
       <p class="lead-err" id="tfErr" hidden></p>
@@ -1765,8 +1778,7 @@ body.splashing .jside{visibility:hidden}
       <label class="lead-f"><span>Name</span><input id="lfName" type="text" autocomplete="name" required></label>
       <label class="lead-f"><span>WhatsApp number</span><input id="lfPhone" type="tel" inputmode="numeric" autocomplete="tel" required></label>
       <label class="lead-f"><span>Gmail ID</span><input id="lfMail" type="email" autocomplete="email" required></label>
-      <label class="lead-f"><span>10th marks (%)</span><input id="lfMarks" type="text" inputmode="decimal" required></label>
-      <label class="lead-f"><span>Training language</span><select id="lfLang"><option value="Tamil">Tamil</option><option value="Hindi">Hindi</option><option value="Telugu">Telugu</option><option value="Kannada">Kannada</option><option value="Malayalam">Malayalam</option></select></label>
+      <label class="lead-f"><span>Training language</span><select id="lfLang" required><option value="">Choose your language</option><option value="Tamil">Tamil</option><option value="Hindi">Hindi</option><option value="Telugu">Telugu</option><option value="Kannada">Kannada</option><option value="Malayalam">Malayalam</option></select></label>
       <label class="lead-f"><span>Select domain</span><select id="lfDomain" required><option value="">Choose a domain</option></select></label>
       <p class="lead-err" id="lfErr" hidden></p>
       <button type="submit" class="lead-btn lead-yes lead-submit" id="lfSubmit">Submit</button>
@@ -1783,6 +1795,9 @@ body.splashing .jside{visibility:hidden}
 
   </div>
 </div>
+<a class="wacloud" id="waCloud" href="https://chat.whatsapp.com/IaGmvdMA5O4ELKlBdCdaYs"
+       target="_blank" rel="noopener" hidden>Connect now to notify<br>when New Jobs Arrives</a>
+
 <a class="wabar" id="waBar" href="https://chat.whatsapp.com/IaGmvdMA5O4ELKlBdCdaYs" target="_blank" rel="noopener" hidden>
   <svg viewBox="0 0 24 24" width="19" height="19" aria-hidden="true"><path fill="currentColor" d="M19.05 4.91A9.82 9.82 0 0 0 12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2 22l5.25-1.38a9.9 9.9 0 0 0 4.74 1.21h.01c5.46 0 9.9-4.45 9.9-9.91 0-2.65-1.03-5.14-2.85-7.01ZM12 20.15h-.01a8.2 8.2 0 0 1-4.19-1.15l-.3-.18-3.12.82.83-3.04-.2-.31a8.22 8.22 0 0 1-1.26-4.38c0-4.54 3.7-8.23 8.25-8.23a8.2 8.2 0 0 1 8.23 8.24c0 4.54-3.7 8.23-8.23 8.23Zm4.52-6.16c-.25-.12-1.47-.72-1.69-.81-.23-.08-.39-.12-.56.13-.16.24-.64.8-.79.97-.14.16-.29.18-.54.06a6.72 6.72 0 0 1-1.99-1.23 7.5 7.5 0 0 1-1.38-1.71c-.14-.25-.01-.38.11-.5.11-.11.25-.29.37-.43.13-.15.17-.25.25-.41.08-.17.04-.31-.02-.43-.06-.12-.56-1.34-.76-1.84-.2-.48-.41-.42-.56-.42l-.48-.01c-.17 0-.43.06-.66.31-.23.24-.86.84-.86 2.05s.89 2.38 1.01 2.54c.12.17 1.74 2.66 4.22 3.73.59.25 1.05.4 1.41.52.59.19 1.13.16 1.56.1.48-.07 1.47-.6 1.67-1.18.21-.58.21-1.08.15-1.18-.06-.11-.23-.17-.48-.29Z"></path></svg>
   <span>Connect now to notify when New Jobs Arrives</span>
@@ -3010,6 +3025,59 @@ function fallbackCopy(text){
 
 function openSheet(){buildSheet();sheet.hidden=false;}
 window.__openShare=openSheet;
+
+/* The little green bubble that points up at the WhatsApp button.
+   It first appears when the visitor taps Next on their first job.
+   Not tapped -> it hides after 15 seconds and comes back a minute later.
+   Tapped -> it is gone for good on that phone. */
+(function(){
+  const cloud=document.getElementById('waCloud');
+  const icon=document.querySelector('.hwa');
+  const row=document.querySelector('.share');
+  if(!cloud||!icon||!row)return;
+
+  const done=()=>{ try{ return localStorage.getItem('lq_wacloud')==='done'; }catch(e){ return true; } };
+  const markDone=()=>{ try{ localStorage.setItem('lq_wacloud','done'); }catch(e){} };
+
+  let hideT=null, showT=null;
+  const stop=()=>{ clearTimeout(hideT); clearTimeout(showT); cloud.hidden=true; };
+
+  // sit the bubble centred under the icon, nudged in if it would run off screen
+  function aim(){
+    const i=icon.getBoundingClientRect();
+    const centre=i.left+i.width/2;
+    cloud.style.right='auto';
+    cloud.style.left='0px';
+    const w=cloud.offsetWidth;
+    const left=Math.min(Math.max(8,centre-w/2), window.innerWidth-w-8);
+    cloud.style.left=left+'px';
+    cloud.style.top=(i.bottom+11)+'px';
+    cloud.style.setProperty('--waArrow',
+      Math.min(Math.max(12,centre-left-6), w-18)+'px');
+  }
+  function show(){
+    if(done())return;
+    cloud.hidden=false;
+    aim();
+    cloud.style.animation='none';
+    void cloud.offsetWidth;
+    cloud.style.animation='';
+    hideT=setTimeout(()=>{
+      cloud.hidden=true;
+      showT=setTimeout(show,60000);       // back after a minute
+    },15000);
+  }
+
+  const finish=()=>{ markDone(); stop(); };
+  cloud.addEventListener('click',finish);
+  icon.addEventListener('click',finish);
+  window.addEventListener('resize',()=>{ if(!cloud.hidden)aim(); });
+
+  window.__waCloud=function(){
+    if(done()||!cloud.hidden||showT||hideT)return;
+    show();
+  };
+})();
 function closeSheet(){sheet.hidden=true;}
 
 document.getElementById('shareBtn').addEventListener('click',()=>{
@@ -3459,14 +3527,14 @@ leadForm.addEventListener('submit',e=>{
     name:val('lfName'),
     whatsapp:val('lfPhone'),
     email:val('lfMail'),
-    marks:val('lfMarks'),
+    marks:'',
     language:val('lfLang'),
     domain:val('lfDomain'),
     company:currentCompany(),
     at:new Date().toISOString()
   };
   const err=document.getElementById('lfErr');
-  if(!lead.name||!lead.whatsapp||!lead.email||!lead.marks||!lead.domain){
+  if(!lead.name||!lead.whatsapp||!lead.email||!lead.language||!lead.domain){
     err.textContent='Please fill every field.';err.hidden=false;return;
   }
   if(!/^[0-9+\- ]{8,15}$/.test(lead.whatsapp)){
@@ -3996,7 +4064,7 @@ window.LQ=(function(){
       at:new Date().toISOString()
     };
     const err=document.getElementById('tfErr');
-    if(!lead.name||!lead.education||!lead.whatsapp||!lead.domain||!lead.location){
+    if(!lead.name||!lead.education||!lead.whatsapp||!lead.language||!lead.domain||!lead.location){
       err.textContent='Please fill every field.';err.hidden=false;return;
     }
     if(!/^[0-9+\- ]{8,15}$/.test(lead.whatsapp)){
@@ -4222,12 +4290,8 @@ window.LQ=(function(){
     jobBody.innerHTML=
       '<div class="jhead'+A+'"'+dly()+'>'+
         (src?'<img class="jlogo" src="'+src+'" alt="'+j.co+'">':'<span class="jco">'+j.co+'</span>')+
-        '<span class="jstat-col">'+
-          '<span class="jstat '+(j.expired?'dead':'live')+'">'+(j.expired?'Closed':'Hiring')+'</span>'+
-          '<a class="jwa" href="'+WA_LINK+'" target="_blank" rel="noopener" aria-label="Join our WhatsApp group">'+
-            '<svg viewBox="0 0 24 24" width="25" height="25" aria-hidden="true">'+WA_ICON+'</svg>'+
-          '</a>'+
-        '</span>'+
+        '<span class="jstat '+(j.expired?'dead':'live')+'">'+(j.expired?'Closed':'Hiring')+'</span>'+
+
       '</div>'+
       '<h2 class="jrole'+A+'"'+dly()+'>'+j.role+'</h2>'+
       '<div class="jgrid">'+
@@ -4252,7 +4316,7 @@ window.LQ=(function(){
       '<button type="button" class="sbtn" id="jNext"'+((filter!=='new'&&idx===list.length-1)?' disabled':'')+'>'+sic(pNext)+'Next</button>'+
       '<button type="button" class="sbtn main" id="jApply"'+(j.expired?' disabled':'')+'>'+sic(pSend)+'Apply</button>'+
       '<button type="button" class="sbtn" id="jQs">'+sic(pPaper)+'Q&amp;A</button>'+
-      '<button type="button" class="sbtn'+(wished?' on':'')+'" id="jWish">'+sic(pHeart,wished)+'Wishlist</button>'+
+      '<button type="button" class="sbtn'+(wished?' on':'')+'" id="jWish"'+(j.expired?' disabled':'')+'>'+sic(pHeart,wished)+'Wishlist</button>'+
       '<button type="button" class="sbtn" id="jPrev"'+(idx===0?' disabled':'')+'>'+sic(pPrev)+'Previous</button>';
 
     const apply=document.getElementById('jApply');
@@ -4387,6 +4451,7 @@ window.LQ=(function(){
     requestAnimationFrame(alignQ);
 
     document.getElementById('jWish').addEventListener('click',()=>{
+      if(j.expired)return;
       const at=wish.indexOf(j.id);
       if(at>-1)wish.splice(at,1); else wish.push(j.id);
       save('pf_wish',wish);
@@ -4406,6 +4471,7 @@ window.LQ=(function(){
     document.getElementById('jPrev').addEventListener('click',()=>{if(idx>0)jump(idx-1);});
     document.getElementById('jNext').addEventListener('click',()=>{
       LQ.ev('qa_next');
+      if(window.__waCloud)window.__waCloud();
       if(idx<list.length-1){jump(idx+1,true);return;}
       if(filter!=='new')return;
       // last new job — clear it and show the waiting screen
