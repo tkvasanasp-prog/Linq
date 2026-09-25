@@ -136,6 +136,16 @@ nav .ic{position:relative;display:block}
   font:600 11.4px system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
 }
 .seg.on{background:var(--spark);border-color:var(--spark);color:#fff}
+.langs{display:flex;gap:6px;overflow-x:auto;margin-bottom:11px;padding-bottom:2px;-webkit-overflow-scrolling:touch}
+.langs::-webkit-scrollbar{display:none}
+.lang{
+  flex:none;cursor:pointer;border-radius:999px;padding:6px 13px;
+  background:#fff;border:1px solid var(--line);color:var(--paper);
+  font:600 11px system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  white-space:nowrap;
+}
+.lang.on{background:var(--spark);border-color:var(--spark);color:#fff}
+.lang i{font-style:normal;opacity:.7;margin-left:5px}
 .lead{
   background:#fff;border:1px solid var(--line);border-left:3px solid var(--spark);
   border-radius:12px;padding:11px 12px;margin-bottom:9px;
@@ -407,6 +417,7 @@ nav .ic{position:relative;display:block}
         <button type="button" class="seg on" data-seg="basic">Basic leads<span class="dot" id="dotBasic" hidden>0</span></button>
         <button type="button" class="seg" data-seg="quality">Quality leads<span class="dot" id="dotQuality" hidden>0</span></button>
       </div>
+      <div class="langs" id="leadLangs"></div>
       <p class="hint" id="leadHint"></p>
       <div class="tools">
         <button type="button" class="btn ghost" id="leadCsv">Download CSV</button>
@@ -719,20 +730,44 @@ async function loadLeads(){
   drawLeads();
 }
 
+const LANGS = ['Tamil','Hindi','Telugu','Kannada','Malayalam'];
+let lang = 'all';
+
+function drawLangs(inSeg){
+  const box = document.getElementById('leadLangs');
+  if(!box) return;
+  const count = k => k==='all' ? inSeg.length
+                   : inSeg.filter(l => (l.language||'') === k).length;
+  const names = LANGS.slice();
+  inSeg.forEach(l=>{ const v=l.language||''; if(v && names.indexOf(v)===-1) names.push(v); });
+  if(LANGS.indexOf(lang)===-1 && names.indexOf(lang)===-1) lang='all';
+  box.innerHTML = ['all'].concat(names).map(k=>
+    '<button type="button" class="lang'+(k===lang?' on':'')+'" data-lang="'+esc(k)+'">'+
+      (k==='all'?'All':esc(k))+'<i>'+count(k)+'</i></button>').join('');
+  box.querySelectorAll('[data-lang]').forEach(b=>{
+    b.addEventListener('click',()=>{ lang=b.dataset.lang; drawLeads(); });
+  });
+}
+
 function drawLeads(){
-  const list = leadCache.filter(l => (l.kind==='quality') === (seg==='quality')).slice().reverse();
+  const inSeg = leadCache.filter(l => (l.kind==='quality') === (seg==='quality'));
+  drawLangs(inSeg);
+  const list = inSeg.filter(l => lang==='all' || (l.language||'') === lang).slice().reverse();
 
   // opening a segment clears its badge
   SEEN.set(seg, leadCache.filter(l => (l.kind==='quality') === (seg==='quality')).length);
   refreshBadges();
 
+  const inLang = lang==='all' ? '' : ' who chose ' + lang;
   document.getElementById('leadHint').textContent = seg==='quality'
-    ? list.length + ' quality lead' + (list.length===1?'':'s') + ' — from the Placements page, newest first.'
-    : list.length + ' basic lead' + (list.length===1?'':'s') + ' — from the training ad, newest first.';
+    ? list.length + ' quality lead' + (list.length===1?'':'s') + inLang + ' — from the Placements page, newest first.'
+    : list.length + ' basic lead' + (list.length===1?'':'s') + inLang + ' — from the training ad, newest first.';
 
   const box = document.getElementById('leadList');
   if(!list.length){
-    box.innerHTML = '<div class="empty"><b>No '+(seg==='quality'?'quality':'basic')+' leads yet</b>They will appear here as soon as a student submits the form.</div>';
+    box.innerHTML = lang==='all'
+      ? '<div class="empty"><b>No '+(seg==='quality'?'quality':'basic')+' leads yet</b>They will appear here as soon as a student submits the form.</div>'
+      : '<div class="empty"><b>No '+esc(lang)+' leads yet</b>Tap <b style="display:inline">All</b> to see every lead.</div>';
     return;
   }
   box.innerHTML = list.map((l,i)=>{
@@ -760,12 +795,14 @@ function drawLeads(){
 }
 
 document.getElementById('leadCsv').addEventListener('click',()=>{
-  const list = leadCache.filter(l => (l.kind==='quality') === (seg==='quality'));
+  const list = leadCache
+    .filter(l => (l.kind==='quality') === (seg==='quality'))
+    .filter(l => lang==='all' || (l.language||'') === lang);
   const head = ['Date','Name','WhatsApp','Email','Education','10th marks','Domain','Location','Language','Program / Interested in'];
   const cell = v => '"'+String(v==null?'':v).replace(/"/g,'""')+'"';
   const rows = [head.map(cell).join(',')];
   list.forEach(l=>rows.push([l.at,l.name,l.whatsapp,l.email,l.education,l.marks,l.domain,l.location,l.language,l.program||l.company].map(cell).join(',')));
-  download('linq-'+seg+'-leads.csv', rows.join('\n'), 'text/csv');
+  download('linq-'+seg+(lang==='all'?'':'-'+lang.toLowerCase())+'-leads.csv', rows.join('\n'), 'text/csv');
 });
 
 /* ================= users ================= */

@@ -433,8 +433,8 @@ body.offers .screen{display:flex;flex-direction:column;min-height:100vh}
 .sbtn.on{color:var(--spark)}
 .sbtn:disabled{opacity:.4;cursor:default}
 .sbtn:active .sic{transform:scale(.94)}
-.jhead{display:flex;align-items:center;gap:7.9px;margin-bottom:10.1px;margin-right:-47.5px}
-.jlogo{height:28px;width:auto;max-width:96px;object-fit:contain}
+.jhead{display:flex;align-items:flex-start;gap:7.9px;margin-bottom:10.1px;margin-right:-47.5px}
+.jlogo{height:28px;margin-top:1px;width:auto;max-width:96px;object-fit:contain}
 .jco{font:500 14.1px system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;color:var(--dim)}
 .jstat{
   margin-left:auto;flex:none;
@@ -443,6 +443,35 @@ body.offers .screen{display:flex;flex-direction:column;min-height:100vh}
 }
 .jstat.live{background:rgba(16,150,80,.13);color:#127C3C}
 .jstat.dead{background:rgba(214,32,48,.11);color:#C2202F}
+.jstat-col{
+  margin-left:auto;flex:none;
+  display:flex;flex-direction:column;align-items:flex-end;gap:7px;
+}
+.jstat-col .jstat{margin-left:0}
+.jwa{
+  width:42px;height:42px;border-radius:50%;
+  display:grid;place-items:center;
+  background:#fff;border:1px solid var(--line);
+  color:#25D366;line-height:0;
+  box-shadow:0 4px 14px rgba(16,40,80,.12);
+}
+.jwa:active{transform:translateY(1px)}
+
+/* "Connect now" bar above the tab bar on the waiting screen */
+.wabar{
+  position:fixed;left:0;right:0;z-index:13;
+  bottom:90px;
+  display:flex;align-items:center;justify-content:center;gap:9px;
+  margin:0 auto;width:max-content;max-width:92vw;
+  padding:10px 17px;border-radius:999px;
+  background:#25D366;color:#fff;text-decoration:none;
+  font:700 13.4px system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  box-shadow:0 12px 26px rgba(37,211,102,.34);
+}
+.wabar svg{flex:none}
+.wabar:active{transform:translateY(1px)}
+.wabar[hidden]{display:none}
+body:not(.jobs-on) .wabar{display:none}
 
 .jrole{
   font:700 21.6px/1.3 system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;color:var(--paper);
@@ -490,6 +519,10 @@ body.offers .screen{display:flex;flex-direction:column;min-height:100vh}
   to{opacity:1;transform:translateX(0)}
 }
 .janim{animation:jslide .5s cubic-bezier(.22,.9,.3,1) both}
+.jqbtn.off{
+  background:#B9C6D8;box-shadow:none;cursor:default;
+  animation:none;transform:none;
+}
 .jqbtn{
   position:fixed;left:11px;bottom:90px;z-index:11;
   cursor:pointer;border:0;border-radius:999px;
@@ -1570,7 +1603,7 @@ body.splashing .jside{visibility:hidden}
       <label class="lead-f"><span>Name</span><input id="tfName" type="text" autocomplete="name" required></label>
       <label class="lead-f"><span>Education</span><input id="tfEdu" type="text" placeholder="e.g. B.E CSE 2025" required></label>
       <label class="lead-f"><span>Contact</span><input id="tfPhone" type="tel" inputmode="numeric" autocomplete="tel" required></label>
-      <label class="lead-f"><span>Training language</span><select id="tfLang"><option value="Tamil">Tamil (only Tamil is available)</option></select></label>
+      <label class="lead-f"><span>Training language</span><select id="tfLang"><option value="Tamil">Tamil</option><option value="Hindi">Hindi</option><option value="Telugu">Telugu</option><option value="Kannada">Kannada</option><option value="Malayalam">Malayalam</option></select></label>
       <label class="lead-f"><span>Select domain</span><select id="tfDomain" required><option value="">Choose a domain</option></select></label>
       <label class="lead-f"><span>Location</span><input id="tfLoc" type="text" placeholder="City" required></label>
       <p class="lead-err" id="tfErr" hidden></p>
@@ -1733,7 +1766,7 @@ body.splashing .jside{visibility:hidden}
       <label class="lead-f"><span>WhatsApp number</span><input id="lfPhone" type="tel" inputmode="numeric" autocomplete="tel" required></label>
       <label class="lead-f"><span>Gmail ID</span><input id="lfMail" type="email" autocomplete="email" required></label>
       <label class="lead-f"><span>10th marks (%)</span><input id="lfMarks" type="text" inputmode="decimal" required></label>
-      <label class="lead-f"><span>Training language</span><select id="lfLang"><option value="Tamil">Tamil (only Tamil is available)</option></select></label>
+      <label class="lead-f"><span>Training language</span><select id="lfLang"><option value="Tamil">Tamil</option><option value="Hindi">Hindi</option><option value="Telugu">Telugu</option><option value="Kannada">Kannada</option><option value="Malayalam">Malayalam</option></select></label>
       <label class="lead-f"><span>Select domain</span><select id="lfDomain" required><option value="">Choose a domain</option></select></label>
       <p class="lead-err" id="lfErr" hidden></p>
       <button type="submit" class="lead-btn lead-yes lead-submit" id="lfSubmit">Submit</button>
@@ -1750,6 +1783,11 @@ body.splashing .jside{visibility:hidden}
 
   </div>
 </div>
+<a class="wabar" id="waBar" href="https://chat.whatsapp.com/IaGmvdMA5O4ELKlBdCdaYs" target="_blank" rel="noopener" hidden>
+  <svg viewBox="0 0 24 24" width="19" height="19" aria-hidden="true"><path fill="currentColor" d="M19.05 4.91A9.82 9.82 0 0 0 12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2 22l5.25-1.38a9.9 9.9 0 0 0 4.74 1.21h.01c5.46 0 9.9-4.45 9.9-9.91 0-2.65-1.03-5.14-2.85-7.01ZM12 20.15h-.01a8.2 8.2 0 0 1-4.19-1.15l-.3-.18-3.12.82.83-3.04-.2-.31a8.22 8.22 0 0 1-1.26-4.38c0-4.54 3.7-8.23 8.25-8.23a8.2 8.2 0 0 1 8.23 8.24c0 4.54-3.7 8.23-8.23 8.23Zm4.52-6.16c-.25-.12-1.47-.72-1.69-.81-.23-.08-.39-.12-.56.13-.16.24-.64.8-.79.97-.14.16-.29.18-.54.06a6.72 6.72 0 0 1-1.99-1.23 7.5 7.5 0 0 1-1.38-1.71c-.14-.25-.01-.38.11-.5.11-.11.25-.29.37-.43.13-.15.17-.25.25-.41.08-.17.04-.31-.02-.43-.06-.12-.56-1.34-.76-1.84-.2-.48-.41-.42-.56-.42l-.48-.01c-.17 0-.43.06-.66.31-.23.24-.86.84-.86 2.05s.89 2.38 1.01 2.54c.12.17 1.74 2.66 4.22 3.73.59.25 1.05.4 1.41.52.59.19 1.13.16 1.56.1.48-.07 1.47-.6 1.67-1.18.21-.58.21-1.08.15-1.18-.06-.11-.23-.17-.48-.29Z"></path></svg>
+  <span>Connect now to notify when New Jobs Arrives</span>
+</a>
+
 <nav class="tabbar" aria-label="Sections">
   <a class="tabitem is-on" href="#" id="tabJ" aria-current="page">
     <span class="ti">
@@ -3525,6 +3563,8 @@ function fitHeader(){
   if(tk) document.documentElement.style.setProperty('--tickh',tk.offsetHeight+'px');
   const sh=document.querySelector('.shell');
   if(sh) document.documentElement.style.setProperty('--panelTop',sh.offsetTop+'px');
+  const tb=document.querySelector('.tabbar');
+  if(tb) document.documentElement.style.setProperty('--tabh',tb.offsetHeight+'px');
 }
 fitHeader();
 window.addEventListener('resize',()=>{fitHeader();fitSoon();});
@@ -4139,9 +4179,13 @@ window.LQ=(function(){
       jside.innerHTML='';
       const qb0=document.getElementById('jqBtn');
       if(qb0)qb0.hidden=true;
+      const wb0=document.getElementById('waBar');
+      if(wb0)wb0.hidden=(filter!=='new');
       return;
     }
     if(idx>list.length-1) idx=list.length-1;
+    const wb=document.getElementById('waBar');
+    if(wb)wb.hidden=true;
     const j=list[idx];
 
     curId=j.id;
@@ -4163,6 +4207,8 @@ window.LQ=(function(){
     const iClock='<circle cx="12" cy="12" r="8.4"></circle><path d="M12 7.4V12l3.1 1.9"></path>';
     const iPin='<path d="M12 21.2s7-5.6 7-10.4a7 7 0 0 0-14 0c0 4.8 7 10.4 7 10.4"></path><circle cx="12" cy="10.6" r="2.6"></circle>';
     const iFlag='<path d="M5.5 21V4.2M5.5 4.8h11l-1.9 3.6 1.9 3.6h-11"></path>';
+    const WA_LINK='https://chat.whatsapp.com/IaGmvdMA5O4ELKlBdCdaYs';
+    const WA_ICON='<path fill="currentColor" d="M19.05 4.91A9.82 9.82 0 0 0 12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2 22l5.25-1.38a9.9 9.9 0 0 0 4.74 1.21h.01c5.46 0 9.9-4.45 9.9-9.91 0-2.65-1.03-5.14-2.85-7.01ZM12 20.15h-.01a8.2 8.2 0 0 1-4.19-1.15l-.3-.18-3.12.82.83-3.04-.2-.31a8.22 8.22 0 0 1-1.26-4.38c0-4.54 3.7-8.23 8.25-8.23a8.2 8.2 0 0 1 8.23 8.24c0 4.54-3.7 8.23-8.23 8.23Zm4.52-6.16c-.25-.12-1.47-.72-1.69-.81-.23-.08-.39-.12-.56.13-.16.24-.64.8-.79.97-.14.16-.29.18-.54.06a6.72 6.72 0 0 1-1.99-1.23 7.5 7.5 0 0 1-1.38-1.71c-.14-.25-.01-.38.11-.5.11-.11.25-.29.37-.43.13-.15.17-.25.25-.41.08-.17.04-.31-.02-.43-.06-.12-.56-1.34-.76-1.84-.2-.48-.41-.42-.56-.42l-.48-.01c-.17 0-.43.06-.66.31-.23.24-.86.84-.86 2.05s.89 2.38 1.01 2.54c.12.17 1.74 2.66 4.22 3.73.59.25 1.05.4 1.41.52.59.19 1.13.16 1.56.1.48-.07 1.47-.6 1.67-1.18.21-.58.21-1.08.15-1.18-.06-.11-.23-.17-.48-.29Z"></path>';
 
     const doAnim=anim!==false;
     let step=0;
@@ -4176,7 +4222,12 @@ window.LQ=(function(){
     jobBody.innerHTML=
       '<div class="jhead'+A+'"'+dly()+'>'+
         (src?'<img class="jlogo" src="'+src+'" alt="'+j.co+'">':'<span class="jco">'+j.co+'</span>')+
-        '<span class="jstat '+(j.expired?'dead':'live')+'">'+(j.expired?'Closed':'Hiring')+'</span>'+
+        '<span class="jstat-col">'+
+          '<span class="jstat '+(j.expired?'dead':'live')+'">'+(j.expired?'Closed':'Hiring')+'</span>'+
+          '<a class="jwa" href="'+WA_LINK+'" target="_blank" rel="noopener" aria-label="Join our WhatsApp group">'+
+            '<svg viewBox="0 0 24 24" width="25" height="25" aria-hidden="true">'+WA_ICON+'</svg>'+
+          '</a>'+
+        '</span>'+
       '</div>'+
       '<h2 class="jrole'+A+'"'+dly()+'>'+j.role+'</h2>'+
       '<div class="jgrid">'+
@@ -4319,13 +4370,20 @@ window.LQ=(function(){
       if(op)op.onclick=()=>{sheet.hidden=true;openJobQs(j,src);};
       sheet.onclick=e=>{if(e.target===sheet)sheet.hidden=true;};
     };
-    document.getElementById('jQs').addEventListener('click',()=>{
-      if(jobHasQs(j)){openQs();return;}
+    const has=jobHasQs(j);
+    const qsBtn=document.getElementById('jQs');
+    if(qsBtn) qsBtn.disabled=!!j.expired;        // closed job: greyed out, no message
+    qsBtn.addEventListener('click',()=>{
+      if(j.expired)return;
+      if(has){openQs();return;}
       toast('Interview questions for this job have not been uploaded yet.');
     });
-    const has=jobHasQs(j);
     const qb=document.getElementById('jqBtn');
-    if(qb){qb.hidden=!has;qb.onclick=openQs;}
+    if(qb){
+      qb.hidden=!has;
+      qb.classList.toggle('off',!!j.expired);
+      qb.onclick=()=>{ if(!j.expired)openQs(); };
+    }
     requestAnimationFrame(alignQ);
 
     document.getElementById('jWish').addEventListener('click',()=>{
