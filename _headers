@@ -1,0 +1,6 @@
+/index.html
+  Cache-Control: public, max-age=0, must-revalidate
+
+/panel.html
+  Cache-Control: public, max-age=0, must-revalidate
+  X-Robots-Tag: noindex

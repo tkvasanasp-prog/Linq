@@ -343,6 +343,7 @@ nav .ic{position:relative;display:block}
   <main>
     <!-- ============ DASHBOARD ============ -->
     <section id="pgDash">
+      <div id="dashNote"></div>
       <div class="sec">
         <div class="sec-h">Shares</div>
         <div class="card">
@@ -408,6 +409,7 @@ nav .ic{position:relative;display:block}
         <p class="dash-n"><b>people</b> = the same phone doing it again does not add.
           <b>taps</b> = every single tap is counted.</p>
         <button type="button" class="dash-reset" id="dashReset">Reset all counts to zero</button>
+        <button type="button" class="dash-reset" id="dashImport">Bring data from the old site</button>
       </div>
     </section>
 
@@ -659,6 +661,34 @@ if(dashReset){
     else note('bad','Could not reach the server.');
   });
 }
+
+const dashImport = document.getElementById('dashImport');
+if(dashImport) dashImport.addEventListener('click', async ()=>{
+  if(dashImport.dataset.armed !== '1'){
+    dashImport.dataset.armed='1';
+    dashImport.textContent='Tap again to copy everything across';
+    dashImport.classList.add('armed');
+    setTimeout(()=>{ if(dashImport.dataset.armed==='1'){
+      dashImport.dataset.armed='0';
+      dashImport.textContent='Bring data from the old site';
+      dashImport.classList.remove('armed');
+    }},5000);
+    return;
+  }
+  dashImport.dataset.armed='0';
+  dashImport.classList.remove('armed');
+  dashImport.textContent='Copying...';
+  const out = await API.call('import', {});
+  dashImport.textContent='Bring data from the old site';
+  if(out && out.ok){
+    const n = out.imported || {};
+    note('ok','Copied '+(n.jobs||0)+' jobs, '+(n.leads||0)+' leads, '+
+              (n.users||0)+' profiles and '+(n.domains||0)+' domains.');
+    loadDash();
+  } else {
+    note('bad', (out && out.error) || 'Could not reach the server.');
+  }
+});
 
 async function loadDash(){
   const res = await API.call('stats');
@@ -1163,7 +1193,12 @@ document.getElementById('jQSave').addEventListener('click',()=>{
 });
 
 function note(kind, text){
-  const box = document.getElementById('jobNote');
+  // show the message on whichever page is open
+  const dash = document.getElementById('pgDash');
+  const box = (dash && !dash.hidden)
+    ? document.getElementById('dashNote')
+    : document.getElementById('jobNote');
+  if(!box) return;
   box.innerHTML = '<div class="note '+kind+'">'+esc(text)+'</div>';
   window.scrollTo(0,0);
   setTimeout(()=>{ box.innerHTML=''; }, 6000);
