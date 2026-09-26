@@ -219,6 +219,10 @@ a{color:inherit}
 
 /* ---- lead capture, floating over the same backdrop ---- */
 body.leadopen .cta,body.leadopen .cta-fade{display:none!important}
+/* the green WhatsApp bubble and the green "Connect now" bar stay out of the way
+   while the share step or the training offer is on screen */
+body.leadopen .wacloud,
+body.leadopen .wabar{display:none!important}
 body.formopen .news{opacity:.35}
 .ad-wait{
   position:relative;z-index:3;
@@ -2954,10 +2958,8 @@ const isAndroid=/Android/i.test(navigator.userAgent||'');
 
 function waLink(u){
   const txt=encodeURIComponent(shareMsg(u));
-  // on Android, name the package so WhatsApp Business does not claim the link
-  return isAndroid
-    ? 'intent://send?text='+txt+'#Intent;scheme=whatsapp;package=com.whatsapp;end'
-    : 'https://wa.me/?text='+txt;
+  // plain link: works with WhatsApp and WhatsApp Business alike
+  return 'https://wa.me/?text='+txt;
 }
 
 function smsLink(u){
@@ -3098,6 +3100,12 @@ window.__openShare=openSheet;
 })();
 function closeSheet(){sheet.hidden=true;}
 
+// picking any app in the sheet — or copying the link — counts as sharing
+sheetGrid.addEventListener('click',e=>{
+  if(!e.target.closest('.sheet-item'))return;
+  setTimeout(()=>{ closeSheet(); if(window.__shareTaken)window.__shareTaken(); },350);
+});
+
 document.getElementById('shareBtn').addEventListener('click',()=>{
   LQ.ev('share');
   shareBase++;
@@ -3134,6 +3142,7 @@ document.getElementById('copyLink').addEventListener('click',()=>{
   copy(shareURL()).then(()=>{
     b.textContent='Link copied';
     setTimeout(()=>{b.textContent='Copy link';},1800);
+    setTimeout(()=>{ closeSheet(); if(window.__shareTaken)window.__shareTaken(); },900);
   });
 });
 
@@ -3453,23 +3462,36 @@ function showShareGate(fn){
   adEl.hidden=false;
   document.body.classList.add('leadopen');
   btn.onclick=()=>{
-    markShareGateDone();
-    LQ.ev('share');
+    // open the share sheet but leave this screen standing behind it.
+    // closing the sheet without picking an app must change nothing.
+    gateWaiting=true;
     if(window.__openShare)window.__openShare();
-    card.hidden=true;
-    adEl.hidden=true;
-    document.body.classList.remove('leadopen');
-    const go=shareNext;shareNext=null;
-    // job 4 and job 5 run clean; the training offer returns after them
-    skips=2;
-    if(go)go();
   };
 }
+
+// called only when the visitor actually picks an app or copies the link
+let gateWaiting=false;
+window.__shareTaken=function(){
+  if(!gateWaiting)return;
+  gateWaiting=false;
+  markShareGateDone();
+  LQ.ev('share');
+  const card=document.getElementById('shareCard');
+  if(card)card.hidden=true;
+  adEl.hidden=true;
+  document.body.classList.remove('leadopen');
+  const go=shareNext;shareNext=null;
+  // job 4 and job 5 run clean; the training offer returns after them
+  skips=2;
+  if(go)go();
+};
 window.__shareGate=function(fn){
   if(shareGateDone())return false;
   let n=0;
   try{ n=+(localStorage.getItem('lq_jnext')||0); }catch(e){}
-  if(n>=2){ showShareGate(fn); return true; }
+  // job 1 is on screen when the site opens; the 1st Next brings job 2 and the
+  // WhatsApp bubble, and the 2nd Next is where the share step stands
+  if(n>=1){ showShareGate(fn); return true; }
   try{ localStorage.setItem('lq_jnext',String(n+1)); }catch(e){}
   return false;
 };
