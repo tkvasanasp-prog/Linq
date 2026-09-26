@@ -579,18 +579,24 @@ const ADMIN_PASSWORD = 'linqjobs@kjj.1234';
 const API = (() => {
   const ends = ['/api', '/.netlify/functions/api', 'api.php'];
   let base = null;
-  async function call(kind, body){
+  async function call(kind, body, ms){
     const tries = base ? [base] : ends;
+    const limit = ms || 30000;              // never wait forever
     for(const b of tries){
+      const ac = window.AbortController ? new AbortController() : null;
+      const bell = setTimeout(()=>{ try{ ac && ac.abort(); }catch(e){} }, limit);
       try{
-        const r = await fetch(b + '?kind=' + kind, body ? {
+        const opt = body ? {
           method:'POST', headers:{'content-type':'application/json'}, body:JSON.stringify(body)
-        } : {cache:'no-store'});
+        } : {cache:'no-store'};
+        if(ac) opt.signal = ac.signal;
+        const r = await fetch(b + '?kind=' + kind, opt);
+        clearTimeout(bell);
         if(!r.ok) continue;
         const j = await r.json();
         base = b;
         return j;
-      }catch(e){ /* try next */ }
+      }catch(e){ clearTimeout(bell); /* try next */ }
     }
     return null;
   }
@@ -1104,7 +1110,10 @@ document.getElementById('jLogo').addEventListener('change',e=>{
       const ctx = c.getContext('2d');
       ctx.fillStyle = '#fff'; ctx.fillRect(0,0,c.width,c.height);
       ctx.drawImage(im,0,0,c.width,c.height);
-      drafts[at].logo = c.toDataURL('image/png');
+      // JPEG on a white card: about a tenth the size of PNG, so publishing is quick on mobile data
+      let out = c.toDataURL('image/jpeg', 0.82);
+      if(out.length > 60000) out = c.toDataURL('image/jpeg', 0.62);
+      drafts[at].logo = out;
       drawJob();
       markMissing();
     };
@@ -1223,26 +1232,34 @@ document.getElementById('jPublish').addEventListener('click', async ()=>{
   const btn = document.getElementById('jPublish');
   btn.disabled = true; btn.textContent = 'Publishing…';
 
-  const res = await API.call('jobs');
-  const live = (res && res.jobs) || [];
-  const stamp = Date.now();
-  const add = ready.map((j,i)=>({
-    id: 'a'+stamp+'_'+i,
-    role: j.role, logo: j.logo, link: j.link,
-    closes: j.noDate ? '' : j.last,
-    noDate: !!j.noDate,
-    points: j.points.filter(p=>p.k && p.v),
-    qs: hasQs(j) ? j.qs : null,
-    at: new Date().toISOString()
-  }));
-  const out = await API.call('jobs', {jobs: live.concat(add)});
+  try{
+    const res = await API.call('jobs');
+    if(!res){ note('bad','Could not reach the server. Check your internet and try again.'); return; }
+    const live = (res && res.jobs) || [];
+    const stamp = Date.now();
+    const add = ready.map((j,i)=>({
+      id: 'a'+stamp+'_'+i,
+      role: j.role, logo: j.logo, link: j.link,
+      closes: j.noDate ? '' : j.last,
+      noDate: !!j.noDate,
+      points: j.points.filter(p=>p.k && p.v),
+      qs: hasQs(j) ? j.qs : null,
+      at: new Date().toISOString()
+    }));
+    btn.textContent = 'Publishing… sending';
+    const out = await API.call('jobs', {jobs: live.concat(add)}, 60000);
 
-  btn.disabled = false; btn.textContent = 'Publish all jobs';
-  if(out && out.ok){
-    drafts = [BLANK()]; at = 0; drawJob();
-    note('good', add.length + ' job' + (add.length===1?'':'s') + ' published. They are live on the website now.');
-  }else{
-    note('bad','Could not reach the server. Deploy the site with the functions enabled, then publish again.');
+    if(out && out.ok){
+      drafts = [BLANK()]; at = 0; drawJob();
+      note('good', add.length + ' job' + (add.length===1?'':'s') + ' published. They are live on the website now.');
+    }else{
+      note('bad','Could not publish — the server did not answer. Your jobs are still saved here, so just tap Publish again.');
+    }
+  }catch(err){
+    note('bad','Something went wrong while publishing. Your jobs are still saved here — tap Publish again.');
+  }finally{
+    // always give the button back, whatever happened
+    btn.disabled = false; btn.textContent = 'Publish all jobs';
   }
 });
 
