@@ -971,12 +971,22 @@ function download(name, text, type){
 const BLANK = () => ({
   role:'', last:'', noDate:false, link:'', logo:'',
   points:[{k:'',v:''}],
-  qs:{rep:[],bas:[],exp:[]}
+  qs:{rep:'',bas:'',exp:''}
 });
+
+// question tabs must always be plain text — an old draft may hold [] or null
+function fixQs(d){
+  if(!d.qs || typeof d.qs !== 'object') d.qs = {};
+  ['rep','bas','exp'].forEach(k=>{
+    const v = d.qs[k];
+    d.qs[k] = (typeof v === 'string') ? v : (Array.isArray(v) ? v.join('\n') : '');
+  });
+}
 
 let drafts = local.get('linq_drafts', [BLANK()]);
 // older drafts were saved with six empty boxes — clear those out
 drafts.forEach(d=>{
+  fixQs(d);
   if(typeof d.last !== 'string') d.last = '';
   if(typeof d.noDate !== 'boolean') d.noDate = false;
   if(!Array.isArray(d.points)) { d.points = [{k:'',v:''}]; return; }
@@ -1215,7 +1225,8 @@ function note(kind, text){
 
 function hasQs(j){
   const q = j.qs || {};
-  return !!((q.rep&&q.rep.trim()) || (q.bas&&q.bas.trim()) || (q.exp&&q.exp.trim()));
+  const t = v => String(v == null ? '' : v).trim();   // never assume it is text
+  return !!(t(q.rep) || t(q.bas) || t(q.exp));
 }
 
 document.getElementById('jPublish').addEventListener('click', async ()=>{
