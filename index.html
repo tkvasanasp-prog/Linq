@@ -3527,6 +3527,7 @@ function goTo(i){
 
 // branded pause before the next question
 // LinQ pause, with the training offer on every third skip — shared by both pages
+window.__adTimerBusy=function(){ return !!(adTimer||pendingIdx!==null||leadNext); };
 window.__adGate=function(company,fn){
   if(adTimer||pendingIdx!==null||leadNext)return false;
   skips++;
@@ -4178,6 +4179,10 @@ window.LQ=(function(){
 
   const FILTERS=[['new','New'],['wish','Wishlist'],['seen','Seen'],['exp','Expired']];
   let filter='new', idx=0;
+  // jobs opened during this visit to the New tag — kept so Previous still works
+  let newHold=[];
+  function holdNew(id){ if(id && newHold.indexOf(id)===-1) newHold.push(id); }
+  function dropHold(){ newHold=[]; }
 
   function listFor(f){
     // Wishlist and Seen: the most recent one leads. Both lists are stored in the
@@ -4189,7 +4194,10 @@ window.LQ=(function(){
     if(f==='exp')  return JOBS.filter(j=>j.expired && !j.gone);
     // New: the latest upload leads, and anything still unseen from earlier
     // days queues up behind it until it is seen or expires.
-    return JOBS.filter(j=>!j.expired && (seen.indexOf(j.id)===-1 || j.id===curId))
+    // New: unseen jobs, plus the ones opened during this visit to the tag so
+    // Previous can walk back through them. They drop out when the tag is left.
+    return JOBS.filter(j=>!j.expired && (seen.indexOf(j.id)===-1 ||
+                                         j.id===curId || newHold.indexOf(j.id)>-1))
                .sort(newestFirst);
   }
 
@@ -4250,7 +4258,10 @@ window.LQ=(function(){
       b.setAttribute('aria-selected',k===filter?'true':'false');
       b.textContent=label;
       if(k==='new' && arrivedCount()) b.classList.add('has-new');
-      b.addEventListener('click',()=>{filter=k;idx=0;curId=null;drawTags();drawJob();});
+      b.addEventListener('click',()=>{
+        if(k!==filter) dropHold();     // leaving New lets the seen ones go
+        filter=k;idx=0;curId=null;drawTags();drawJob();
+      });
       jtags.appendChild(b);
     });
   }
@@ -4326,14 +4337,13 @@ window.LQ=(function(){
     const j=list[idx];
 
     curId=j.id;
-    if(filter==='new'){markKnown(j.id);}
+    if(filter==='new'){markKnown(j.id);holdNew(j.id);}
     if(!j.expired && seen.indexOf(j.id)===-1){
       seen.push(j.id);save('pf_seen',seen);
     }
     if(window.LQ&&LQ.view)LQ.view(j.id);
-    // in New, the job on screen is always first in the list once it is seen,
-    // so the next one is index 1 — keep idx at 0 or Next starts skipping jobs
-    if(filter==='new') idx=0;
+    // the New list no longer shrinks as jobs are opened, so idx stays put
+    // and Next / Previous both move one job at a time
     const wished=wish.indexOf(j.id)>-1;
     const src=j.logo||logoFor(j.co);
 
@@ -4537,19 +4547,26 @@ window.LQ=(function(){
         raw();
       }
     };
-    document.getElementById('jPrev').addEventListener('click',()=>{if(idx>0)jump(idx-1);});
+    // going back is free: no pause, no training offer, no share step
+    document.getElementById('jPrev').addEventListener('click',()=>{
+      if(idx<=0)return;
+      if(window.__adTimerBusy&&window.__adTimerBusy())return;   // not mid-pause
+      idx=idx-1;drawTags();drawJob();
+    });
     document.getElementById('jNext').addEventListener('click',()=>{
       LQ.ev('qa_next');
       if(window.__waCloud)window.__waCloud();
       if(idx<list.length-1){jump(idx+1,true);return;}
       if(filter!=='new')return;
-      // last new job — clear it and show the waiting screen
-      const done=()=>{curId=null;idx=0;drawTags();drawJob();};
+      // last new job — let the opened ones go and show the waiting screen
+      const done=()=>{dropHold();curId=null;idx=0;drawTags();drawJob();};
       if(window.__shareGate && window.__shareGate(done)) return;
       if(window.__adGate)window.__adGate(j.co,done); else done();
     });
   }
 
+  // returning to the jobs view (after an ad, the share step, or another page)
+  // must not throw away the jobs being held for Previous
   window.__showJobs=function(){
     idx=0;curId=null;drawTags();drawJob();
   };
