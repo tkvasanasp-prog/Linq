@@ -2945,14 +2945,23 @@ const SHARE_TITLE='JobsLink + Interview Questions';
 const SHARE_TAG='Daily 100+ IT Jobs Updates';
 // the exact message that goes out with every share
 function shareMsg(u){
-  return 'Click: '+u+'\n\n'+
+  return 'TODAY IT JOBS ( Apply now )\n\n'+
+    'Click here : '+u+'\n\n'+
     '\u2022 JobsLink + Interview Questions\n'+
-    '\u2022 Apply & Attend Interview\n'+
-    '\u2022 Top Companies Interview Questions\n'+
-    '\u2022 Daily 100+ IT Jobs Updates';
+    '\u2022 Interview Drive Time & Location\n'+
+    '\u2022 Companies Direct Job Applying Link\n'+
+    '\u2022 ZOHO , ACCENTURE , DELOITTE, EY, CAPGEMINI, ORACLE,etc...100+ Companies';
 }
 
-function shareURL(){return window.location.href.split('#')[0];}
+// always share the real domain, even if the page was opened on a preview address
+const HOME='https://linqjobs.com';
+function shareURL(){
+  try{
+    const h=location.hostname;
+    if(h==='linqjobs.com'||h==='www.linqjobs.com') return location.origin+'/';
+  }catch(e){}
+  return HOME+'/';
+}
 
 const isAndroid=/Android/i.test(navigator.userAgent||'');
 
@@ -4171,10 +4180,30 @@ window.LQ=(function(){
   let filter='new', idx=0;
 
   function listFor(f){
-    if(f==='wish') return JOBS.filter(j=>wish.indexOf(j.id)>-1 && !j.expired);
-    if(f==='seen') return JOBS.filter(j=>seen.indexOf(j.id)>-1 && !j.expired);
+    // Wishlist and Seen: the most recent one leads. Both lists are stored in the
+    // order things happened, so a later position means it happened later.
+    if(f==='wish') return JOBS.filter(j=>wish.indexOf(j.id)>-1 && !j.expired)
+                             .sort((a,b)=>wish.indexOf(b.id)-wish.indexOf(a.id));
+    if(f==='seen') return JOBS.filter(j=>seen.indexOf(j.id)>-1 && !j.expired)
+                             .sort((a,b)=>seen.indexOf(b.id)-seen.indexOf(a.id));
     if(f==='exp')  return JOBS.filter(j=>j.expired && !j.gone);
-    return JOBS.filter(j=>!j.expired && (seen.indexOf(j.id)===-1 || j.id===curId));
+    // New: the latest upload leads, and anything still unseen from earlier
+    // days queues up behind it until it is seen or expires.
+    return JOBS.filter(j=>!j.expired && (seen.indexOf(j.id)===-1 || j.id===curId))
+               .sort(newestFirst);
+  }
+
+  // Newest upload leads. Within one upload the admin's own order is kept,
+  // so job 1 of a batch is still the first the student sees.
+  function batchOf(j){
+    const m=/^a(\d+)_(\d+)$/.exec(String(j.id||''));
+    if(m) return [+m[1], +m[2]];
+    return [Date.parse(j.at||'')||0, 0];
+  }
+  function newestFirst(a,b){
+    const A=batchOf(a), B=batchOf(b);
+    if(B[0]!==A[0]) return B[0]-A[0];   // later upload first
+    return A[1]-B[1];                   // inside it, the admin's order
   }
 
   function fmt(d){
@@ -4556,6 +4585,7 @@ window.LQ=(function(){
           id:a.id||('a'+added.length), co:a.co||a.role, role:a.role, logo:a.logo||'',
           dom:a.dom||'da', link:a.link||'', points:(a.points||[]), raw:a.qs||null,
           lastShown:shown, qual:'', elig:'', lpa:'', time:'', loc:'',
+          at:a.at||'',                       // when the admin published it
           interview:closes, closes:closes, expired:b<0, gone:b<-3
         });
       });
